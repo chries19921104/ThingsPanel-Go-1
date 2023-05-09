@@ -203,6 +203,7 @@ func (*TSKVService) HdlOrderMsgProc(body []byte, topic string) bool {
 		Id:             uuid.GetUuid(),
 		ShopName:       shop.Name,
 		OrderSn:        data.OrderID,
+		BottomId:       data.PotID,
 		BottomPot:      recipe.BottomPot,
 		TableNumber:    data.TableNumber,
 		OrderTime:      orderTimeParse,

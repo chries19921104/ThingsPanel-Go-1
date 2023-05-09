@@ -29,12 +29,12 @@ func (*SoupDataService) GetList(PaginationValidate valid.SoupDataPaginationValid
 		if err := psql.Mydb.Model(&models.Asset{}).Where("name like ?", "%"+PaginationValidate.ShopName+"%").First(asset).Error; err != nil {
 			return false, nil, 0
 		}
-		db.Where("shop_id = ?", asset.ID)
+		db = db.Where("add_soup_data.shop_id = ?", asset.ID)
 	}
 
 	var count int64
 	db.Count(&count)
-	result := db.Model(new(models.AddSoupData)).Select("recipe.bottom_pot,add_soup_data.order_sn,add_soup_data.table_number,add_soup_data.order_time,add_soup_data.soup_start_time,add_soup_data.soup_end_time,add_soup_data.feeding_start_time,add_soup_data.feeding_end_time,add_soup_data.turning_pot_end_time,add_soup_data.turning_pot_end_time,asset.name").Joins("left join recipe on add_soup_data.bottom_id = recipe.bottom_pot_id").Joins("left join asset on add_soup_data.shop_id = asset.id").Limit(PaginationValidate.PerPage).Offset(offset).Find(&SoupData)
+	result := db.Model(new(models.AddSoupData)).Select("add_soup_data.bottom_pot,add_soup_data.order_sn,add_soup_data.table_number,add_soup_data.order_time,add_soup_data.soup_start_time,add_soup_data.soup_end_time,add_soup_data.feeding_start_time,add_soup_data.feeding_end_time,add_soup_data.turning_pot_end_time,add_soup_data.turning_pot_end_time,asset.name").Joins("left join recipe on add_soup_data.bottom_id = recipe.bottom_pot_id").Joins("left join asset on add_soup_data.shop_id = asset.id").Limit(PaginationValidate.PerPage).Offset(offset).Find(&SoupData)
 	if result.Error != nil {
 		logs.Error(result.Error, gorm.ErrRecordNotFound)
 		return false, SoupData, 0
@@ -100,7 +100,6 @@ add_soup_data.soup_start_time,add_soup_data.soup_end_time,add_soup_data.feeding_
 			FeedingStartTime: v.FeedingStartTime,
 			FeedingEndTime:   v.FeedingEndTime,
 			TurningPotEnd:    v.TurningPotEnd,
-
 		}
 		tsk = append(tsk, ts)
 	}

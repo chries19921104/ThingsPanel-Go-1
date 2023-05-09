@@ -47,9 +47,25 @@ func (soup *SoupDataController) Index() {
 		response.SuccessWithMessage(1000, "查询失败", (*context2.Context)(soup.Ctx))
 		return
 	}
+	returnAddSoupData := make([]models.ReturnAddSoupDataValue, 0)
+	for _, v := range d {
+		returnAddSoupData = append(returnAddSoupData, models.ReturnAddSoupDataValue{
+			Id:               v.Id,
+			ShopName:         v.ShopName,
+			OrderSn:          v.OrderSn,
+			BottomPot:        v.BottomPot,
+			TableNumber:      v.TableNumber,
+			OrderTime:        v.OrderTime.Unix()*1000,
+			SoupStartTime:    v.SoupStartTime.Unix()*1000,
+			SoupEndTime:      v.SoupEndTime.Unix()*1000,
+			FeedingStartTime: v.FeedingStartTime.Unix()*1000,
+			FeedingEndTime:   v.FeedingEndTime.Unix()*1000,
+			TurningPotEnd:    v.TurningPotEnd.Unix()*1000,
+		})
+	}
 	dd := valid.RspSoupDataPaginationValidate{
 		CurrentPage: PaginationValidate.CurrentPage,
-		Data:        d,
+		Data:        returnAddSoupData,
 		Total:       t,
 		PerPage:     PaginationValidate.PerPage,
 	}
