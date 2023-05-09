@@ -3,9 +3,10 @@ package mqtt
 import (
 	"errors"
 	"fmt"
+	"os"
+
 	"github.com/beego/beego/v2/core/logs"
 	"gopkg.in/yaml.v3"
-	"os"
 )
 
 type ShopContent struct {
@@ -136,6 +137,22 @@ func SendToHDL(payload []byte, token string) (err error) {
 	}
 	// 发送消息
 	err = Publish("device/attributes"+"/"+token, byte(hdlConfig.Qos), false, string(payload))
+	if err != nil {
+		logs.Error("publish error: %v", err)
+		return err
+	}
+	return nil
+}
+
+// 向海底捞发送mqtt消息
+func SendTimeToHDL(payload []byte, token string) (err error) {
+	// 读取配置文件
+	hdlConfig, err := ParseYaml()
+	if err != nil {
+		return err
+	}
+	// 发送消息
+	err = Publish("device/command/"+token, byte(hdlConfig.Qos), false, string(payload))
 	if err != nil {
 		logs.Error("publish error: %v", err)
 		return err

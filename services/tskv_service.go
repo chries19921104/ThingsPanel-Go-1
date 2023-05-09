@@ -164,13 +164,44 @@ func (*TSKVService) MsgProcOther(body []byte, topic string) {
 func (*TSKVService) HdlOrderMsgProc(body []byte, topic string) bool {
 	//写处理和入库逻辑
 	logs.Info("------------------------------")
-	logs.Info("来自网关设备的订单消息：")
+	logs.Info("来自海底捞的订单消息：")
 	logs.Info(string(body))
 	logs.Info("------------------------------")
 	payload, err := verifyPayload(body)
 	if err != nil {
 		logs.Error(err.Error())
 		return false
+	}
+	logs.Info(string(payload.Values))
+	// 定义一个map类型的变量
+	var dataMap map[string]interface{}
+
+	// 解析JSON字符串为map类型
+	if err := json.Unmarshal(payload.Values, &dataMap); err != nil {
+		logs.Error(err)
+		return false
+	}
+	// 判断map中是否存在某个key
+	if _, ok := dataMap["method"]; ok {
+		// 如果method是currentTime，说明是设备获取时间请求
+		if dataMap["method"] == "currentTime" {
+			// 获取当前时间,格式化为2006-01-02 15:04:05
+			currentTime := time.Now().Format("2006-01-02 15:04:05")
+			dataMap["time"] = currentTime
+			// 将map转为json字符串
+			jsonStr, err := json.Marshal(dataMap)
+			if err != nil {
+				logs.Error(err)
+				return false
+			}
+			logs.Info(string(jsonStr))
+			err = mqtt.SendTimeToHDL(jsonStr, payload.Token)
+			if err != nil {
+				logs.Error(err)
+				return false
+			}
+			return true
+		}
 	}
 	var data mqtt.HdlOrder
 	err = json.Unmarshal(payload.Values, &data)
