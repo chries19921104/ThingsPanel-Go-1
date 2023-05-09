@@ -4,7 +4,9 @@ import (
 	"ThingsPanel-Go/initialize/psql"
 	"ThingsPanel-Go/initialize/redis"
 	"ThingsPanel-Go/models"
+	"ThingsPanel-Go/modules/dataService/mqtt"
 	"ThingsPanel-Go/utils"
+	uuid "ThingsPanel-Go/utils"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -161,6 +163,72 @@ func (*TSKVService) MsgProcOther(body []byte, topic string) {
 // 接收海底捞订单消息
 func (*TSKVService) HdlOrderMsgProc(body []byte, topic string) bool {
 	//写处理和入库逻辑
+	logs.Info("------------------------------")
+	logs.Info("来自网关设备的订单消息：")
+	logs.Info(string(body))
+	logs.Info("------------------------------")
+	payload, err := verifyPayload(body)
+	if err != nil {
+		logs.Error(err.Error())
+		return false
+	}
+	var data mqtt.HdlOrder
+	err = json.Unmarshal(payload.Values, &data)
+	if err != nil {
+		logs.Error(err)
+		return false
+	}
+	logs.Info(data)
+	var shop models.Asset
+	err = psql.Mydb.Where("id = ?", data.StoreID).First(&shop).Error
+	if err != nil {
+		logs.Error(err)
+		return false
+	}
+	var recipe models.Recipe
+	err = psql.Mydb.Select("bottom_pot").Where("id = ?", data.PotID).First(&recipe).Error
+	if err != nil {
+		logs.Error(err)
+		return false
+
+	}
+
+	orderTimeParse, _ := time.ParseInLocation("2006-01-02 15:04:05", data.OrderTime, time.Local)
+	SoupAddingStartTimeParse, _ := time.ParseInLocation("2006-01-02 15:04:05", data.SoupAddingStartTime, time.Local)
+	SoupAddingFinishTimeParse, _ := time.ParseInLocation("2006-01-02 15:04:05", data.SoupAddingFinishTime, time.Local)
+	PotSwitchingFinishTimeParse, _ := time.ParseInLocation("2006-01-02 15:04:05", data.PotSwitchingFinishTime, time.Local)
+	CreationTimeParse, _ := time.ParseInLocation("2006-01-02 15:04:05", data.CreationTime, time.Local)
+
+	dataModel := &models.AddSoupData{
+		Id:             uuid.GetUuid(),
+		ShopName:       shop.Name,
+		OrderSn:        data.OrderID,
+		BottomPot:      recipe.BottomPot,
+		TableNumber:    data.TableNumber,
+		OrderTime:      orderTimeParse,
+		SoupStartTime:  SoupAddingStartTimeParse,
+		SoupEndTime:    SoupAddingFinishTimeParse,
+		FeedingEndTime: PotSwitchingFinishTimeParse,
+		TurningPotEnd:  CreationTimeParse,
+		ShopId:         data.StoreID,
+		CreateAt:       time.Now().Local(),
+	}
+
+	err = psql.Mydb.Create(dataModel).Error
+	if err != nil {
+		logs.Error(err)
+		return false
+	}
+	//dec_str, err := base64.StdEncoding.DecodeString()
+	//if err != nil {
+	//	logs.Error(err)
+	//	return false
+	//}
+	//if values, ok := payload.Values.(map[string]interface{}); ok {
+	//	logs.Info()
+	//}
+	//logs.Info(dec_str)
+
 	// 原发送数据为payload，到这里就变成{"token":"xxx","values":payload},payload为[]byte
 	// 参考上下两个接收数据方法
 	return true

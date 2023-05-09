@@ -55,6 +55,19 @@ type Recipe struct {
 	MaterialIdList []string `json:"MaterialIdList"`
 }
 
+type HdlOrder struct {
+	StoreID                    string `json:"storeId"`
+	OrderID                    string `json:"orderId"`
+	PotID                      string `json:"potId"`
+	TableNumber                string `json:"tableNumber"`
+	OrderTime                  string `json:"orderTime"`
+	SoupAddingStartTime        string `json:"soupAddingStartTime"`
+	SoupAddingFinishTime       string `json:"soupAddingFinishTime"`
+	IngredientAddingFinishTime string `json:"ingredientAddingFinishTime"`
+	PotSwitchingFinishTime     string `json:"potSwitchingFinishTime"`
+	CreationTime               string `json:"creationTime"`
+}
+
 /*店铺配置信息json案例,potType锅型,taste口味,materials配料,recipe锅底配方,shop店铺
 {
 	"shop": {
