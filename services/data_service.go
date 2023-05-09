@@ -78,7 +78,7 @@ func (*SoupDataService) Paginate(shopName string, limit int, offset int) ([]mode
 	//LEFT JOIN asset  ON asset.id=device.asset_id
 	//LEFT JOIN business ON business.id=asset.business_id
 	//WHERE 1=1  and ts_kv.ts >= 1654790400000000 and ts_kv.ts < 1655481599000000 ORDER BY ts_kv.ts DESC limit 10 offset 0
-	SQL := `select add_soup_data.order_sn,asset.name,add_soup_data.table_number,add_soup_data.order_time,recipe.bottom_pot,
+	SQL := `select add_soup_data.order_sn,asset.name,add_soup_data.table_number,add_soup_data.order_time,add_soup_data.bottom_pot,
 add_soup_data.soup_start_time,add_soup_data.soup_end_time,add_soup_data.feeding_start_time,add_soup_data.feeding_end_time,add_soup_data.turning_pot_end_time ,asset.name FROM add_soup_data  LEFT JOIN asset  ON add_soup_data.shop_id=asset.id LEFT JOIN recipe on add_soup_data.bottom_id = recipe.bottom_pot_id` + SQLWhere
 	if limit > 0 && offset >= 0 {
 		SQL = fmt.Sprintf("%s limit ? offset ? ", SQL)
