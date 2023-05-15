@@ -163,7 +163,7 @@ func (*RecipeService) DeleteRecipe(pot models.Recipe) error {
 }
 
 // 拆分下发配置
-func (*RecipeService) SplitSendMqtt(data *mqtt.SendConfig, token string) error {
+func (*RecipeService) SplitSendMqtt(data *mqtt.SendConfig, token string, intervalTime int) error {
 	//随机6位字符串
 	sendId := utils.GetRandomString(6)
 	// 锅型配置
@@ -179,6 +179,8 @@ func (*RecipeService) SplitSendMqtt(data *mqtt.SendConfig, token string) error {
 	if err := mqtt.SendToHDL(bytes, token); err != nil {
 		return err
 	}
+	//等待时间
+	time.Sleep(time.Second * time.Duration(intervalTime))
 	//口味配置,每10个口味下发一次
 	for i := 0; i < len(data.Taste); i += 10 {
 		end := i + 10
@@ -196,6 +198,8 @@ func (*RecipeService) SplitSendMqtt(data *mqtt.SendConfig, token string) error {
 		if err := mqtt.SendToHDL(bytes, token); err != nil {
 			return err
 		}
+		//等待时间
+		time.Sleep(time.Second * time.Duration(intervalTime))
 	}
 	//食材配置,每10个食材下发一次
 	for i := 0; i < len(data.Materials); i += 10 {
@@ -214,6 +218,8 @@ func (*RecipeService) SplitSendMqtt(data *mqtt.SendConfig, token string) error {
 		if err := mqtt.SendToHDL(bytes, token); err != nil {
 			return err
 		}
+		//等待时间
+		time.Sleep(time.Second * time.Duration(intervalTime))
 	}
 	//食谱配置,每10个食谱下发一次
 	for i := 0; i < len(data.Recipe); i += 10 {
@@ -232,6 +238,8 @@ func (*RecipeService) SplitSendMqtt(data *mqtt.SendConfig, token string) error {
 		if err := mqtt.SendToHDL(bytes, token); err != nil {
 			return err
 		}
+		//等待时间
+		time.Sleep(time.Second * time.Duration(intervalTime))
 	}
 	return nil
 
