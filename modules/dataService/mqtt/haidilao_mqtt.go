@@ -68,6 +68,22 @@ type HdlOrder struct {
 	PotSwitchingFinishTime     string `json:"potSwitchingFinishTime"`
 	CreationTime               string `json:"creationTime"`
 }
+type PotTypeConfig struct {
+	SendId  string
+	PotType []*PotType
+}
+type TasteConfig struct {
+	SendId string
+	Taste  []*Taste
+}
+type MaterialsConfig struct {
+	SendId    string
+	Materials []*Materials
+}
+type RecipeConfig struct {
+	SendId string
+	Recipe []*Recipe
+}
 
 /*店铺配置信息json案例,potType锅型,taste口味,materials配料,recipe锅底配方,shop店铺
 {

@@ -4,15 +4,18 @@ import (
 	"ThingsPanel-Go/initialize/psql"
 	"ThingsPanel-Go/models"
 	"ThingsPanel-Go/modules/dataService/mqtt"
+	"ThingsPanel-Go/utils"
 	valid "ThingsPanel-Go/validate"
 	"crypto/md5"
 	"encoding/hex"
+	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/beego/beego/v2/core/logs"
-	"gorm.io/gorm"
 	"strings"
 	"time"
+
+	"github.com/beego/beego/v2/core/logs"
+	"gorm.io/gorm"
 )
 
 type RecipeService struct {
@@ -159,6 +162,80 @@ func (*RecipeService) DeleteRecipe(pot models.Recipe) error {
 
 }
 
+// 拆分下发配置
+func (*RecipeService) SplitSendMqtt(data *mqtt.SendConfig, token string) error {
+	//随机6位字符串
+	sendId := utils.GetRandomString(6)
+	// 锅型配置
+	potTypeConfig := &mqtt.PotTypeConfig{
+		SendId:  sendId,
+		PotType: data.PotType,
+	}
+	//发送给mqtt
+	bytes, err := json.Marshal(potTypeConfig)
+	if err != nil {
+		return err
+	}
+	if err := mqtt.SendToHDL(bytes, token); err != nil {
+		return err
+	}
+	//口味配置,每10个口味下发一次
+	for i := 0; i < len(data.Taste); i += 10 {
+		end := i + 10
+		if end > len(data.Taste) {
+			end = len(data.Taste)
+		}
+		tasteConfig := &mqtt.TasteConfig{
+			SendId: sendId,
+			Taste:  data.Taste[i:end],
+		}
+		bytes, err := json.Marshal(tasteConfig)
+		if err != nil {
+			return err
+		}
+		if err := mqtt.SendToHDL(bytes, token); err != nil {
+			return err
+		}
+	}
+	//食材配置,每10个食材下发一次
+	for i := 0; i < len(data.Materials); i += 10 {
+		end := i + 10
+		if end > len(data.Materials) {
+			end = len(data.Materials)
+		}
+		materialsConfig := &mqtt.MaterialsConfig{
+			SendId:    sendId,
+			Materials: data.Materials[i:end],
+		}
+		bytes, err := json.Marshal(materialsConfig)
+		if err != nil {
+			return err
+		}
+		if err := mqtt.SendToHDL(bytes, token); err != nil {
+			return err
+		}
+	}
+	//食谱配置,每10个食谱下发一次
+	for i := 0; i < len(data.Recipe); i += 10 {
+		end := i + 10
+		if end > len(data.Recipe) {
+			end = len(data.Recipe)
+		}
+		recipeConfig := &mqtt.RecipeConfig{
+			SendId: sendId,
+			Recipe: data.Recipe[i:end],
+		}
+		bytes, err := json.Marshal(recipeConfig)
+		if err != nil {
+			return err
+		}
+		if err := mqtt.SendToHDL(bytes, token); err != nil {
+			return err
+		}
+	}
+	return nil
+
+}
 func (*RecipeService) GetSendToMQTTData(assetId string) (*mqtt.SendConfig, error) {
 	var Asset models.Asset
 	err2 := psql.Mydb.Where("id = ?", assetId).First(&Asset).Error

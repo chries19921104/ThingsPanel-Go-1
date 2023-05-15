@@ -3,18 +3,18 @@ package controllers
 import (
 	gvalid "ThingsPanel-Go/initialize/validate"
 	"ThingsPanel-Go/models"
-	"ThingsPanel-Go/modules/dataService/mqtt"
 	"ThingsPanel-Go/services"
 	response "ThingsPanel-Go/utils"
 	uuid "ThingsPanel-Go/utils"
 	valid "ThingsPanel-Go/validate"
 	"encoding/json"
 	"fmt"
+	"strings"
+	"time"
+
 	"github.com/beego/beego/v2/core/validation"
 	beego "github.com/beego/beego/v2/server/web"
 	context2 "github.com/beego/beego/v2/server/web/context"
-	"strings"
-	"time"
 )
 
 type RecipeController struct {
@@ -392,17 +392,22 @@ func (pot *RecipeController) SendToHDL() {
 		response.SuccessWithMessage(400, err.Error(), (*context2.Context)(pot.Ctx))
 		return
 	}
-	bytes, err := json.Marshal(list)
+	err = Recipe.SplitSendMqtt(list, SendToMQTTValidator.AccessToken)
 	if err != nil {
 		response.SuccessWithMessage(400, err.Error(), (*context2.Context)(pot.Ctx))
 		return
 	}
-	fmt.Println(string(bytes))
-	err = mqtt.SendToHDL(bytes, SendToMQTTValidator.AccessToken)
-	if err != nil {
-		response.SuccessWithMessage(400, err.Error(), (*context2.Context)(pot.Ctx))
-		return
-	}
+	// bytes, err := json.Marshal(list)
+	// if err != nil {
+	// 	response.SuccessWithMessage(400, err.Error(), (*context2.Context)(pot.Ctx))
+	// 	return
+	// }
+	// fmt.Println(string(bytes))
+	// err = mqtt.SendToHDL(bytes, SendToMQTTValidator.AccessToken)
+	// if err != nil {
+	// 	response.SuccessWithMessage(400, err.Error(), (*context2.Context)(pot.Ctx))
+	// 	return
+	// }
 	response.SuccessWithMessage(200, "success", (*context2.Context)(pot.Ctx))
 }
 
