@@ -6,6 +6,7 @@ import (
 	uuid "ThingsPanel-Go/utils"
 	valid "ThingsPanel-Go/validate"
 	"errors"
+	"strconv"
 	"time"
 
 	"github.com/beego/beego/v2/core/logs"
@@ -34,6 +35,17 @@ func (*TpWarningInformationService) GetTpWarningInformationList(PaginationValida
 	if PaginationValidate.ProcessingResult != "" {
 		sqlWhere += " and processing_result = ?"
 		paramList = append(paramList, PaginationValidate.ProcessingResult)
+	}
+	if PaginationValidate.StartTime != "" && PaginationValidate.EndTime != "" {
+		// 字符串转int64
+		startTime, _ := strconv.ParseInt(PaginationValidate.StartTime, 10, 64)
+		endTime, _ := strconv.ParseInt(PaginationValidate.EndTime, 10, 64)
+		// 判断开始时间是否大于结束时间
+		if startTime > endTime {
+			return TpWarningInformations, 0, errors.New("开始时间不能大于结束时间")
+		}
+		paramList = append(paramList, startTime, endTime)
+		sqlWhere += " and created_at between ? and ?"
 	}
 	var count int64
 	psql.Mydb.Model(&models.TpWarningInformation{}).Where(sqlWhere, paramList...).Count(&count)

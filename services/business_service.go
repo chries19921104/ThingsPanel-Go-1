@@ -5,6 +5,7 @@ import (
 	"ThingsPanel-Go/models"
 	uuid "ThingsPanel-Go/utils"
 	"errors"
+	"github.com/beego/beego/v2/core/logs"
 	"time"
 
 	"gorm.io/gorm"
@@ -33,40 +34,50 @@ type AllBusiness struct {
 }
 
 // Paginate 分页获取business数据
-func (*BusinessService) Paginate(name string, offset int, pageSize int) ([]models.Business, int64) {
+func (*BusinessService) Paginate(name string, offset int, pageSize int) ([]models.Business, int64, error) {
 	var businesses []models.Business
 	var count int64
 	if name != "" {
 		result := psql.Mydb.Model(&models.Business{}).Where("name LIKE ?", "%"+name+"%").Order("created_at desc").Limit(pageSize).Offset(offset).Find(&businesses)
 		psql.Mydb.Model(&models.Business{}).Where("name LIKE ?", "%"+name+"%").Count(&count)
-		if result.Error != nil {
-			errors.Is(result.Error, gorm.ErrRecordNotFound)
-		}
 		if len(businesses) == 0 {
 			businesses = []models.Business{}
 		}
-		return businesses, count
+		if result.Error != nil {
+			if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+				return businesses, 0, nil
+			}
+			return nil, 0, result.Error
+		}
+		return businesses, count, nil
 	} else {
 		result := psql.Mydb.Model(&models.Business{}).Order("created_at desc").Limit(pageSize).Offset(offset).Find(&businesses)
 		psql.Mydb.Model(&models.Business{}).Count(&count)
-		if result.Error != nil {
-			errors.Is(result.Error, gorm.ErrRecordNotFound)
-		}
 		if len(businesses) == 0 {
 			businesses = []models.Business{}
 		}
-		return businesses, count
+		if result.Error != nil {
+			if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+				return businesses, 0, nil
+			}
+			return nil, 0, result.Error
+		}
+		return businesses, count, nil
 	}
 }
 
 // 根据id获取一条business数据
-func (*BusinessService) GetBusinessById(id string) (*models.Business, int64) {
+func (*BusinessService) GetBusinessById(id string) (*models.Business, int64, error) {
 	var business models.Business
 	result := psql.Mydb.Where("id = ?", id).First(&business)
 	if result.Error != nil {
-		errors.Is(result.Error, gorm.ErrRecordNotFound)
+		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+			return &business, 0, nil
+		}
+		logs.Error(result.Error.Error())
+		return nil, 0, result.Error
 	}
-	return &business, result.RowsAffected
+	return &business, result.RowsAffected, nil
 }
 
 // Add新增一条business数据
@@ -75,7 +86,7 @@ func (*BusinessService) Add(name string) (bool, string) {
 	business := models.Business{ID: bussiness_id, Name: name, CreatedAt: time.Now().Unix()}
 	result := psql.Mydb.Create(&business)
 	if result.Error != nil {
-		errors.Is(result.Error, gorm.ErrRecordNotFound)
+		logs.Error(result.Error.Error())
 		return false, ""
 	}
 	//新增根分组
@@ -95,7 +106,7 @@ func (*BusinessService) Add(name string) (bool, string) {
 func (*BusinessService) Edit(id string, name string) bool {
 	result := psql.Mydb.Model(&models.Business{}).Where("id = ?", id).Update("name", name)
 	if result.Error != nil {
-		errors.Is(result.Error, gorm.ErrRecordNotFound)
+		logs.Error(result.Error.Error())
 		return false
 	}
 	return true
@@ -105,7 +116,7 @@ func (*BusinessService) Edit(id string, name string) bool {
 func (*BusinessService) Delete(id string) bool {
 	result := psql.Mydb.Where("id = ?", id).Delete(&models.Business{})
 	if result.Error != nil {
-		errors.Is(result.Error, gorm.ErrRecordNotFound)
+		logs.Error(result.Error.Error())
 		return false
 	}
 	return true
@@ -118,7 +129,7 @@ func (*BusinessService) All() ([]AllBusiness, int64) {
 	result := psql.Mydb.Model(&models.Business{}).Find(&businesses)
 	psql.Mydb.Model(&models.Business{}).Count(&count)
 	if result.Error != nil {
-		errors.Is(result.Error, gorm.ErrRecordNotFound)
+		logs.Error(result.Error.Error())
 	}
 	if len(businesses) == 0 {
 		businesses = []AllBusiness{}

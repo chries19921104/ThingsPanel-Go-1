@@ -37,17 +37,19 @@ func AuthMiddle() {
 				return
 			}
 			authorization := ctx.Request.Header["Authorization"][0]
-			userToken := authorization[7:len(authorization)]
+			userToken := authorization[7:]
 			_, err := jwt.ParseCliamsToken(userToken)
-			if err != nil {
+			if err != nil || redis.GetStr(userToken) != "1" {
 				// 异常
 				response.SuccessWithMessage(401, "Unauthorized", (*context2.Context)(ctx))
 				return
 			}
-			if redis.GetStr(userToken) != "1" {
-				response.SuccessWithMessage(401, "Unauthorized", (*context2.Context)(ctx))
-				return
-			}
+			// 验证用户是否存在
+			// 双层校验
+			// if psql.Mydb.Where("id = ? and name = ? ", user.ID, user.Name).First(&models.Users{}).Error == gorm.ErrRecordNotFound {
+			// 	response.SuccessWithMessage(401, "Unauthorized", (*context2.Context)(ctx))
+			// 	return
+			// }
 			// s, _ := cache.Bm.IsExist(c.TODO(), userToken)
 			// if !s {
 			// 	response.SuccessWithMessage(401, "Unauthorized", (*context2.Context)(ctx))
@@ -65,9 +67,6 @@ func isAuthExceptUrl(url string, m map[string]interface{}) bool {
 	if len(urlArr) > 4 {
 		url = fmt.Sprintf("%s/%s/%s/%s", urlArr[0], urlArr[1], urlArr[2], urlArr[3])
 	}
-
-	if _, ok := m[url]; ok {
-		return true
-	}
-	return false
+	_, ok := m[url]
+	return ok
 }

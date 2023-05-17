@@ -9,6 +9,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/beego/beego/v2/core/validation"
 	beego "github.com/beego/beego/v2/server/web"
@@ -47,8 +48,8 @@ func (TpOtaDeviceController *TpOtaDeviceController) List() {
 	}
 	datamap := make(map[string]interface{})
 	datamap["list"] = d
-	aaa, c := TpOtaDeviceService.GetTpOtaDeviceStatusCount(PaginationValidate)
-	if !aaa {
+	success, c := TpOtaDeviceService.GetTpOtaDeviceStatusCount(PaginationValidate)
+	if !success {
 		utils.SuccessWithMessage(1000, "查询失败", (*context2.Context)(TpOtaDeviceController.Ctx))
 		return
 	}
@@ -90,7 +91,7 @@ func (TpOtaDeviceController *TpOtaDeviceController) Add() {
 		CurrentVersion:   AddTpOtaDeviceValidate.CurrentVersion,
 		TargetVersion:    AddTpOtaDeviceValidate.TargetVersion,
 		UpgradeProgress:  AddTpOtaDeviceValidate.UpgradeProgress,
-		StatusUpdateTime: AddTpOtaDeviceValidate.StatusUpdateTime,
+		StatusUpdateTime: time.Now().Format("2006-01-02 15:04:05"),
 		UpgradeStatus:    AddTpOtaDeviceValidate.UpgradeStatus,
 		StatusDetail:     AddTpOtaDeviceValidate.StatusDetail,
 	}
@@ -109,8 +110,8 @@ func (TpOtaDeviceController *TpOtaDeviceController) Add() {
 	}
 }
 
-//删除
-func (TpOtaDeviceController *TpOtaDeviceController) Delete() {
+//修改状态
+func (TpOtaDeviceController *TpOtaDeviceController) ModfiyUpdate() {
 	TpOtaDeviceIdValidate := valid.TpOtaDeviceIdValidate{}
 	err := json.Unmarshal(TpOtaDeviceController.Ctx.Input.RequestBody, &TpOtaDeviceIdValidate)
 	if err != nil {
@@ -128,14 +129,11 @@ func (TpOtaDeviceController *TpOtaDeviceController) Delete() {
 		}
 		return
 	}
-	if TpOtaDeviceIdValidate.Id == "" {
-		utils.SuccessWithMessage(1000, "id不能为空", (*context2.Context)(TpOtaDeviceController.Ctx))
+	if TpOtaDeviceIdValidate.Id == "" && TpOtaDeviceIdValidate.OtaTaskId == "" {
+		utils.SuccessWithMessage(1000, "id与任务id不能全部为空", (*context2.Context)(TpOtaDeviceController.Ctx))
 	}
 	var TpOtaDeviceService services.TpOtaDeviceService
-	TpOtaDevice := models.TpOtaDevice{
-		Id: TpOtaDeviceIdValidate.Id,
-	}
-	rsp_err := TpOtaDeviceService.DeleteTpOtaDevice(TpOtaDevice)
+	rsp_err := TpOtaDeviceService.ModfiyUpdateDevice(TpOtaDeviceIdValidate)
 	if rsp_err == nil {
 		utils.SuccessWithMessage(200, "success", (*context2.Context)(TpOtaDeviceController.Ctx))
 	} else {

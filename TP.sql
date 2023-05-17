@@ -772,7 +772,7 @@ INSERT INTO "users" ("id", "created_at", "updated_at", "enabled", "additional_in
 
 INSERT INTO logo
 (id, system_name, theme, logo_one, logo_two, logo_three, custom_id, remark)
-VALUES('1d625cec-bf5b-2ad1-b135-a23b5fad05bf', 'ThingsPanel', 'blue', './files/logo/logo-one.svg', './files/logo/logo-two.gif', './files/logo/logo-three.png', '', '');
+VALUES('1d625cec-bf5b-2ad1-b135-a23b5fad05bf', 'ThingsPanel', 'blue', './files/init-images/logo-one.svg', './files/init-images/logo-two.gif', './files/init-images/logo-three.png', '', '');
 INSERT INTO tp_menu (id,menu_name,parent_id,remark) VALUES
 	 ('1','homepage','0',NULL),
 	 ('2','buisness','0',NULL),
@@ -1603,3 +1603,30 @@ ALTER TABLE public.tp_ota_task ADD CONSTRAINT tp_ota_task_fk FOREIGN KEY (ota_id
 ALTER TABLE public.device ADD product_id varchar(36) NULL;
 ALTER TABLE public.tp_ota_device ADD ota_task_id varchar(36) NOT NULL;
 ALTER TABLE public.tp_ota ADD sign varchar(99) NULL;
+
+ALTER TABLE public.device ADD current_version varchar(99) NULL;
+COMMENT ON COLUMN public.device.current_version IS '当前固件版本号';
+ALTER TABLE public.tp_ota ADD file_size varchar(20) NULL;
+COMMENT ON COLUMN public.tp_ota.file_size IS '文件大小';
+
+INSERT INTO public.tp_function
+(id, function_name, menu_id, "path", name, component, title, icon, "type", function_code, parent_id, sort)
+VALUES('1f72f372-20fc-3f56-9ae7-1227739e11e8', '', NULL, '/product/batch/pre-registration', 'PreRegistration', '/pages/product/managment/batch/pre-registration/index.vue', '预注册管理', '', '2', '', '39936c5b-14fd-588f-60be-77f422aa2d32', 9);
+INSERT INTO public.tp_function
+(id, function_name, menu_id, "path", "name", component, title, icon, "type", function_code, parent_id, sort)
+VALUES('2a06205c-1df2-1d7b-cdaf-236e62d53a62', '', NULL, '/product/ota', 'OTA', '/pages/product/firmware', 'MENU.FIRMWAREUPGRADE', 'menu-icon flaticon2-list', '1', '', '39936c5b-14fd-588f-60be-77f422aa2d32', 987);
+INSERT INTO public.tp_function
+(id, function_name, menu_id, "path", "name", component, title, icon, "type", function_code, parent_id, sort)
+VALUES('86587a5e-5941-0773-566e-4d31973532b2', '', NULL, '/product/ota/task/list', 'OTATask', '/pages/product/firmware/task', '任务列表', '', '2', '', '39936c5b-14fd-588f-60be-77f422aa2d32', 0);
+INSERT INTO public.tp_function
+(id, function_name, menu_id, "path", "name", component, title, icon, "type", function_code, parent_id, sort)
+VALUES('1c90da46-9fc0-32b5-360d-e98ecb33cf0b', '', NULL, '/product/ota/task_detail', 'TaskDetail', '/pages/product/firmware/task/TaskDetail.vue', '任务详情', '', '2', '', '39936c5b-14fd-588f-60be-77f422aa2d32', 0);
+DELETE FROM public.tp_function
+WHERE id='b29d5b40-b635-e34d-ee5f-5cf161348a62';
+INSERT INTO public.tp_function
+(id, function_name, menu_id, "path", "name", component, title, icon, "type", function_code, parent_id, sort)
+VALUES('b29d5b40-b635-e34d-ee5f-5cf161348a62', '', NULL, '', 'Automation', '', 'MENU.AUTOMATION', 'flaticon2-hourglass', '0', '', '0', 960);
+ALTER TABLE public.tp_generate_device RENAME COLUMN activate_flag TO add_flag;
+ALTER TABLE public.tp_generate_device RENAME COLUMN activate_date TO add_date;
+COMMENT ON COLUMN public.tp_generate_device.add_date IS '添加日期';
+COMMENT ON COLUMN public.tp_generate_device.add_flag IS '0-未添加 1-已添加';

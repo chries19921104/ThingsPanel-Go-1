@@ -5,6 +5,7 @@ import (
 	"ThingsPanel-Go/models"
 	"ThingsPanel-Go/services"
 	"fmt"
+	"log"
 	"time"
 
 	"github.com/beego/beego/v2/core/logs"
@@ -16,10 +17,11 @@ import (
 //var C *cron.Cron
 
 func init() {
-	fmt.Println("定时任务初始化开始")
+	log.Println("定时任务初始化...")
 	onceCron()
 	automationCron()
-	fmt.Println("定时任务初始化完成")
+	otaCron()
+	log.Println("定时任务初始化完成")
 }
 
 func automationCron() {

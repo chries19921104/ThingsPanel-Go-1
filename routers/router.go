@@ -328,6 +328,7 @@ func init() {
 		web.NSRouter("/tp_batch/delete", &controllers.TpBatchController{}, "*:Delete"),
 		web.NSRouter("/tp_batch/generate", &controllers.TpBatchController{}, "*:GenerateBatchById"),
 		web.NSRouter("/tp_batch/export", &controllers.TpBatchController{}, "*:Export"),
+		web.NSRouter("/tp_batch/import", &controllers.TpBatchController{}, "*:Import"),
 		//协议插件模块
 		web.NSRouter("/plugin/register", &controllers.TpProtocolPluginController{}, "*:Add"), //插件调用
 		web.NSRouter("/tp_protocol_plugin/add", &controllers.TpProtocolPluginController{}, "*:Add"),
@@ -337,7 +338,11 @@ func init() {
 
 		//生成设备表
 		web.NSRouter("/tp_generate_device/activate", &controllers.TpGenerateDeviceController{}, "*:ActivateDevice"),
+		web.NSRouter("/tp_generate_device/list", &controllers.TpGenerateDeviceController{}, "*:List"),
+		web.NSRouter("/tp_generate_device/delete", &controllers.TpGenerateDeviceController{}, "*:Delete"),
 
+		//通过产品id获取设备列表
+		web.NSRouter("/device/listbyproduct", &controllers.DeviceController{}, "*:DeviceListByProductId"),
 		//固件升级
 		web.NSRouter("/tp_ota/add", &controllers.TpOtaController{}, "*:Add"),
 		web.NSRouter("/tp_ota/list", &controllers.TpOtaController{}, "*:List"),
@@ -345,11 +350,12 @@ func init() {
 		//固件升级任务
 		//web.NSRouter("/tp_ota_task/modifystatus", &controllers.TpOtaTaskController{}, "*:ModifyStatus"),
 		web.NSRouter("/tp_ota_task/list", &controllers.TpOtaTaskController{}, "*:List"),
+		web.NSRouter("/tp_ota_task/add", &controllers.TpOtaTaskController{}, "*:Add"),
 
 		//固件升级设备
 		//web.NSRouter("/tp_ota_device/add", &controllers.TpOtaDeviceController{}, "*:Add"),
 		web.NSRouter("/tp_ota_device/list", &controllers.TpOtaDeviceController{}, "*:List"),
-		//web.NSRouter("/tp_ota_device/delete", &controllers.TpOtaDeviceController{}, "*:Delete"),
+		web.NSRouter("/tp_ota_device/modfiyupdate", &controllers.TpOtaDeviceController{}, "*:ModfiyUpdate"),
 
 		//WVP接口
 		web.NSRouter("/wvp/ptz", &controllers.WvpController{}, "*:PtzControl"),

@@ -8,6 +8,7 @@ import (
 	"crypto/md5"
 	"errors"
 	"fmt"
+	"github.com/beego/beego/v2/core/logs"
 
 	"github.com/beego/beego/v2/core/config/yaml"
 	simplejson "github.com/bitly/go-simplejson"
@@ -619,41 +620,43 @@ func (*AssetService) Edit(data string) bool {
 // 根据ID删除一条asset数据
 func (*AssetService) Delete(id string) bool {
 	result := psql.Mydb.Where("id = ?", id).Delete(&models.Asset{})
-	if result.Error != nil {
-		errors.Is(result.Error, gorm.ErrRecordNotFound)
-		return false
-	} else {
-		return true
-	}
+	return result.Error == nil
 }
 
 // 根据ID获取下级资产
-func (*AssetService) GetAssetsByParentID(parent_id string) ([]models.Asset, int64) {
+func (*AssetService) GetAssetsByParentID(parent_id string) ([]models.Asset, int64, error) {
 	var assets []models.Asset
 	var count int64
-	psql.Mydb.Model(&models.Asset{}).Where("parent_id = ?", parent_id).Count(&count)
+	db := psql.Mydb.Model(&models.Asset{}).Where("parent_id = ?", parent_id)
+	db.Count(&count)
 	//sqlWhere += "order by wl.created_at desc offset ? limit ?"
-	result := psql.Mydb.Model(&models.Asset{}).Where("parent_id = ?", parent_id).Find(&assets)
-
-	if result.Error != nil {
-		errors.Is(result.Error, gorm.ErrRecordNotFound)
-	}
+	result := db.Find(&assets)
 	if len(assets) == 0 {
 		assets = []models.Asset{}
 	}
-	return assets, count
+	if result.Error != nil {
+		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+			return assets, 0, nil
+		}
+		return nil, 0, result.Error
+	}
+	return assets, count, nil
 }
 
 func (*AssetService) GetAssetsByTierAndBusinessID(business_id string) ([]models.Asset, int64) {
 	var assets []models.Asset
 	var count int64
-	result := psql.Mydb.Model(&models.Asset{}).Where("tier=1 AND business_id = ?", business_id).Find(&assets)
-	psql.Mydb.Model(&models.Asset{}).Where("tier=1 AND business_id = ?", business_id).Count(&count)
-	if result.Error != nil {
-		errors.Is(result.Error, gorm.ErrRecordNotFound)
-	}
+	db := psql.Mydb.Model(&models.Asset{}).Where("tier=1 AND business_id = ?", business_id)
+	result := db.Find(&assets)
+	db.Count(&count)
 	if len(assets) == 0 {
 		assets = []models.Asset{}
+	}
+	if result.Error != nil {
+		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+			return assets, 1
+		}
+		return nil, 0
 	}
 	return assets, count
 }
@@ -877,10 +880,14 @@ func (*AssetService) Field(id string, widget_id string) []Field {
 func (*AssetService) GetAssetByBusinessId(business_id string) ([]AssetList, int64) {
 	var assets []AssetList
 	var count int64
-	result := psql.Mydb.Model(&models.Asset{}).Where("business_id = ? AND parent_id='0'", business_id).Find(&assets)
-	psql.Mydb.Model(&models.Asset{}).Where("business_id = ? AND parent_id='0'", business_id).Count(&count)
+	db := psql.Mydb.Model(&models.Asset{}).Where("business_id = ? AND parent_id='0'", business_id)
+	result := db.Find(&assets)
+	db.Count(&count)
 	if result.Error != nil {
-		errors.Is(result.Error, gorm.ErrRecordNotFound)
+		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+			return assets, 1
+		}
+		return nil, 0
 	}
 	if len(assets) == 0 {
 		assets = []AssetList{}
@@ -892,22 +899,24 @@ func (*AssetService) GetAssetByBusinessId(business_id string) ([]AssetList, int6
 func (*AssetService) GetAssetDataByBusinessId(business_id string) (assets []AssetList, err error) {
 	err = psql.Mydb.Model(&models.Asset{}).Where("business_id = ?", business_id).Find(&assets).Error
 	if err != nil {
-		return assets, err
+		return nil, err
 	}
-	return assets, err
+	return assets, nil
 }
 
 // 设备数据
 func (*AssetService) GetAssetData(business_id string) ([]models.Asset, int64) {
 	var assets []models.Asset
 	var count int64
-	result := psql.Mydb.Model(&models.Asset{}).Where("business_id = ? AND tier=1", business_id).Find(&assets)
-	psql.Mydb.Model(&models.Asset{}).Where("business_id = ? AND tier=1", business_id).Count(&count)
-	if result.Error != nil {
-		errors.Is(result.Error, gorm.ErrRecordNotFound)
-	}
+	db := psql.Mydb.Model(&models.Asset{}).Where("business_id = ? AND tier=1", business_id)
+	result := db.Find(&assets)
+	db.Count(&count)
 	if len(assets) == 0 {
 		assets = []models.Asset{}
+	}
+	if result.Error != nil {
+		logs.Error("GetAssetData", result.Error)
+		return assets, 0
 	}
 	return assets, count
 }
@@ -916,11 +925,12 @@ func (*AssetService) GetAssetData(business_id string) ([]models.Asset, int64) {
 func (*AssetService) All() ([]models.Asset, int64) {
 	var assets []models.Asset
 	result := psql.Mydb.Find(&assets)
-	if result.Error != nil {
-		errors.Is(result.Error, gorm.ErrRecordNotFound)
-	}
 	if len(assets) == 0 {
 		assets = []models.Asset{}
+	}
+	if result.Error != nil {
+		logs.Error(result.Error.Error())
+		return nil, 0
 	}
 	return assets, result.RowsAffected
 }
@@ -946,7 +956,8 @@ func (*AssetService) PageGetDeviceGroupByBussinessID(business_id string, current
 	var count int64
 	result := psql.Mydb.Raw(sqlWhere, values...).Count(&count)
 	if result.Error != nil {
-		errors.Is(result.Error, gorm.ErrRecordNotFound)
+		// errors.Is(result.Error, gorm.ErrRecordNotFound)
+		logs.Error(result.Error.Error())
 	}
 	var offset int = (current - 1) * pageSize
 	var limit int = pageSize
@@ -955,7 +966,8 @@ func (*AssetService) PageGetDeviceGroupByBussinessID(business_id string, current
 	var assetList []map[string]interface{}
 	dataResult := psql.Mydb.Raw(sqlWhere, values...).Scan(&assetList)
 	if dataResult.Error != nil {
-		errors.Is(dataResult.Error, gorm.ErrRecordNotFound)
+		//errors.Is(dataResult.Error, gorm.ErrRecordNotFound)
+		logs.Error(dataResult.Error.Error())
 	}
 	return assetList, count
 }
@@ -973,14 +985,16 @@ func (*AssetService) DeviceGroupByBussinessID(business_id string) ([]map[string]
 	var count int64
 	result := psql.Mydb.Raw(sqlWhere, values...)
 	if result.Error != nil {
-		errors.Is(result.Error, gorm.ErrRecordNotFound)
+		//errors.Is(result.Error, gorm.ErrRecordNotFound)
+		logs.Error(result.Error.Error())
 	} else {
 		count = result.RowsAffected
 	}
 	var assetList []map[string]interface{}
 	dataResult := psql.Mydb.Raw(sqlWhere, values...).Scan(&assetList)
 	if dataResult.Error != nil {
-		errors.Is(dataResult.Error, gorm.ErrRecordNotFound)
+		//errors.Is(dataResult.Error, gorm.ErrRecordNotFound)
+		logs.Error(dataResult.Error.Error())
 	}
 	return assetList, count
 }
@@ -990,7 +1004,8 @@ func (*AssetService) GetAssetById(id string) (*models.Asset, int64) {
 	var asset models.Asset
 	result := psql.Mydb.Where("id = ?", id).First(&asset)
 	if result.Error != nil {
-		errors.Is(result.Error, gorm.ErrRecordNotFound)
+		//errors.Is(result.Error, gorm.ErrRecordNotFound)
+		return nil, 0
 	}
 	return &asset, result.RowsAffected
 }

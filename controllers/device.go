@@ -7,6 +7,7 @@ import (
 	"ThingsPanel-Go/models"
 	tphttp "ThingsPanel-Go/others/http"
 	"ThingsPanel-Go/services"
+	"ThingsPanel-Go/utils"
 	comm "ThingsPanel-Go/utils"
 	response "ThingsPanel-Go/utils"
 	uuid "ThingsPanel-Go/utils"
@@ -515,7 +516,7 @@ func (this *DeviceController) Configure() {
 	//DeviceService
 }
 
-//控制设备
+// 控制设备
 func (request *DeviceController) Operating() {
 	operatingDeviceValidate := valid.OperatingDevice{}
 	err := json.Unmarshal(request.Ctx.Input.RequestBody, &operatingDeviceValidate)
@@ -666,8 +667,8 @@ func (deviceController *DeviceController) Reset() {
 		return
 	}
 	var DeviceService services.DeviceService
-	f, _ := DeviceService.Token(operatingDevice.DeviceId)
-	if f.Token != "" {
+	f, i := DeviceService.Token(operatingDevice.DeviceId)
+	if i != 0 {
 		operatingMap := map[string]interface{}{
 			"token":  f.Token,
 			"values": operatingDevice.Values,
@@ -955,4 +956,40 @@ func (c *DeviceController) DeviceStatus() {
 		response.SuccessWithMessage(400, err.Error(), (*context2.Context)(c.Ctx))
 	}
 	response.SuccessWithDetailed(200, "success", d, map[string]string{}, (*context2.Context)(c.Ctx))
+}
+
+// 新增某产品下的所有设备列表
+// 2023-3-20
+func (c *DeviceController) DeviceListByProductId() {
+	PaginationValidate := valid.DevicePaginationValidate{}
+	err := json.Unmarshal(c.Ctx.Input.RequestBody, &PaginationValidate)
+	if err != nil {
+		fmt.Println("参数解析失败", err.Error())
+	}
+	v := validation.Validation{}
+	status, _ := v.Valid(PaginationValidate)
+	if !status {
+		for _, err := range v.Errors {
+			// 获取字段别称
+			alias := gvalid.GetAlias(PaginationValidate, err.Field)
+			message := strings.Replace(err.Message, err.Field, alias, 1)
+			utils.SuccessWithMessage(1000, message, (*context2.Context)(c.Ctx))
+			break
+		}
+		return
+	}
+	var DeviceService services.DeviceService
+	isSuccess, d, t := DeviceService.DeviceListByProductId(PaginationValidate)
+	if !isSuccess {
+		utils.SuccessWithMessage(1000, "查询失败", (*context2.Context)(c.Ctx))
+		return
+	}
+	dd := valid.RspDevicePaginationValidate{
+		CurrentPage: PaginationValidate.CurrentPage,
+		Data:        d,
+		Total:       t,
+		PerPage:     PaginationValidate.PerPage,
+	}
+	utils.SuccessWithDetailed(200, "success", dd, map[string]string{}, (*context2.Context)(c.Ctx))
+
 }
