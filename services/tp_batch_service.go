@@ -3,10 +3,12 @@ package services
 import (
 	"ThingsPanel-Go/initialize/psql"
 	"ThingsPanel-Go/models"
+	"ThingsPanel-Go/utils"
 	uuid "ThingsPanel-Go/utils"
 	valid "ThingsPanel-Go/validate"
 	"encoding/base64"
 	"errors"
+	"fmt"
 	"io/ioutil"
 	"os"
 	"strconv"
@@ -60,8 +62,6 @@ func (*TpBatchService) GetTpBatchList(PaginationValidate valid.TpBatchPagination
 
 // 新增数据
 func (*TpBatchService) AddTpBatch(tp_batch models.TpBatch) (models.TpBatch, error) {
-	var uuid = uuid.GetUuid()
-	tp_batch.Id = uuid
 	result := psql.Mydb.Create(&tp_batch)
 	if result.Error != nil {
 		logs.Error(result.Error, gorm.ErrRecordNotFound)
@@ -82,7 +82,7 @@ func (*TpBatchService) EditTpBatch(tp_batch valid.TpBatchValidate) bool {
 
 // 删除数据
 func (*TpBatchService) DeleteTpBatch(tp_batch models.TpBatch) error {
-	sql := `select count(*) from tp_generate_device where activate_flag = '1' and batch_id= ?`
+	sql := `select count(*) from tp_generate_device where add_flag = '1' and batch_id= ?`
 	var count int64
 	if resultcount := psql.Mydb.Raw(sql, tp_batch.Id).Scan(&count); resultcount.Error != nil {
 		logs.Error(resultcount.Error)
@@ -102,7 +102,7 @@ func (*TpBatchService) DeleteTpBatch(tp_batch models.TpBatch) error {
 //批次表-产品表关联查询
 func (*TpBatchService) productBatch(tp_batch_id string) (map[string]interface{}, error) {
 	var pb map[string]interface{}
-	result := psql.Mydb.Raw("select * from tp_batch tb left join tp_product tp on  tb.product_id = tp.id where tb.id = ?", tp_batch_id).Scan(&pb)
+	result := psql.Mydb.Raw("select tb.*,tp.serial_number from tp_batch tb left join tp_product tp on  tb.product_id = tp.id where tb.id = ?", tp_batch_id).Scan(&pb)
 	if result.RowsAffected == int64(0) {
 		return pb, errors.New("没有这个批次信息！")
 	}
@@ -126,13 +126,15 @@ func (*TpBatchService) GenerateBatch(tp_batch_id string) error {
 		if tp_batch["auth_type"] == "2" {
 			uid = strings.Replace(uuid.GetUuid(), "-", "", -1)[0:9]
 		}
+		device_code := tp_batch["serial_number"].(string) + "-" + tp_batch["batch_number"].(string) + "-" + fmt.Sprintf("%04d", i+1)
 		var TpGenerateDevice = models.TpGenerateDevice{
-			BatchId:      tp_batch_id,
-			Token:        uuid.GetUuid(),
-			Password:     uid,
-			ActivateFlag: "0",
-			CreatedTime:  time.Now().Unix(),
-			DeviceId:     uuid.GetUuid(),
+			BatchId:     tp_batch_id,
+			Token:       uuid.GetUuid(),
+			Password:    uid,
+			AddFlag:     "0",
+			CreatedTime: time.Now().UnixMicro(),
+			DeviceId:    uuid.GetUuid(),
+			DeviceCode:  device_code,
 		}
 		// 插入数据
 		TpGenerateDeviceService.AddTpGenerateDevice(TpGenerateDevice)
@@ -158,7 +160,7 @@ func (*TpBatchService) Export(batch_id string) (string, error) {
 	excel_file.SetCellValue("Sheet1", "F1", "密码")
 	excel_file.SetCellValue("Sheet1", "G1", "二维码bash64")
 	var gpb []map[string]interface{}
-	sql := `select tgd.device_id as device_id,tgd.activate_flag as activate_flag ,tgd.token as token ,tgd.password as password ,tp.protocol_type as protocol_type ,tp.plugin as plugin, 
+	sql := `select tgd.device_id as device_id,tgd.add_flag as add_flag ,tgd.token as token ,tgd.password as password ,tp.protocol_type as protocol_type ,tp.plugin as plugin, 
 	tb.access_address as access_address ,tp.serial_number as serial_number,tb.batch_number as batch_number,tgd.id as generate_device_id
 	from tp_generate_device tgd left join tp_batch tb on tgd.batch_id = tb.id left join tp_product tp on  tb.product_id = tp.id where tb.id = ?`
 	result := psql.Mydb.Raw(sql, batch_id).Scan(&gpb)
@@ -208,4 +210,60 @@ func (*TpBatchService) Export(batch_id string) (string, error) {
 		logs.Error(err.Error())
 	}
 	return excelName, nil
+}
+
+//导入
+func (*TpBatchService) Import(bath_id, batch_number, product_id, file string) ([]models.TpGenerateDevice, error) {
+	var authtype string
+	if err := psql.Mydb.Model(&models.TpProduct{}).Select("auth_type").Where("id=?", product_id).Find(&authtype).Error; err != nil {
+		return nil, errors.New("产品查询失败")
+	}
+	var product_serial_number string
+	if err := psql.Mydb.Model(&models.TpProduct{}).Select("serial_number").Where("id=?", product_id).Find(&product_serial_number).Error; err != nil {
+		return nil, errors.New("产品编号查询失败")
+	}
+	f, err := excelize.OpenFile(file)
+	if err != nil {
+		logs.Error("打开文件失败")
+		return nil, errors.New("打开文件失败")
+	}
+	fl := f.GetSheetList()
+	if len(fl) < 0 {
+		return nil, errors.New("无sheet处理")
+	}
+	rows, err1 := f.GetRows(fl[0])
+	if err1 != nil {
+		return nil, errors.New("获取行失败")
+	}
+	devicenumber := len(rows)
+	if len(rows) <= 1 {
+		return nil, errors.New("无设备数据不能创建批次")
+	}
+	if len(rows) > 10000 {
+		return nil, errors.New("设备数量超上限")
+	}
+	var generatedevices []models.TpGenerateDevice
+	passwd := ""
+	for i := 1; i < devicenumber; i++ {
+		if authtype == "2" && len(rows[i]) <= 2 {
+			return nil, errors.New("MQTTBasic认证方式必须有密码")
+		}
+		if rows[i][1] == "" {
+			return nil, errors.New("必须有token")
+		}
+		if len(rows[i]) == 3 {
+			passwd = rows[i][2]
+		}
+		generatedevices = append(generatedevices, models.TpGenerateDevice{
+			Id:          utils.GetUuid(),
+			BatchId:     bath_id,
+			Token:       rows[i][1],
+			Password:    passwd,
+			AddFlag:     "0",
+			CreatedTime: time.Now().UnixMicro(),
+			DeviceCode:  product_serial_number + "-" + batch_number + "-" + fmt.Sprintf("%04d", i),
+		})
+	}
+	return generatedevices, nil
+
 }

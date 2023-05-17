@@ -1,9 +1,17 @@
 package utils
 
 import (
+	"crypto/md5"
+	"crypto/sha256"
+	"encoding/hex"
 	"errors"
 	"fmt"
+	"io"
+	"net/url"
+	"os"
 	"strings"
+
+	"github.com/beego/beego/v2/core/logs"
 )
 
 func TsKvFilterToSql(filters map[string]interface{}) (string, []interface{}) {
@@ -78,6 +86,30 @@ func CheckFilename(param string) error {
 	return nil
 }
 
+//用户文件全路径安全校验
+func CheckPathFilename(param string) error {
+	if count := strings.Count(param, "."); count > 2 {
+		return errors.New("文件全路径中不能超过两个“.”")
+	}
+	if count := strings.Count(param, "/"); count > 5 {
+		return errors.New("文件全路径中不能包含非法字符“/”")
+	}
+	if count := strings.Count(param, "\\"); count > 0 {
+		return errors.New("文件全路径中不能包含非法字符“\\”")
+	}
+	return nil
+}
+
+// 提取url中的路径
+func GetUrlPath(rawURL string) string {
+	parsedURL, err := url.Parse(rawURL)
+	if err != nil {
+		logs.Error("url parse error: %v", err)
+		return ""
+	}
+	return parsedURL.Path
+}
+
 //字符串替换非法字符
 func ReplaceUserInput(s string) string {
 	newStringInput := strings.NewReplacer("\n", " ", "\r", " ")
@@ -93,4 +125,56 @@ func ContainsIllegal(target string) bool {
 		}
 	}
 	return false
+}
+
+//文件md5计算
+func FileSign(filePath string, sign string) (string, error) {
+	check_err := CheckPathFilename(filePath)
+	if check_err != nil {
+		return "", check_err
+	}
+	file, err := os.Open(filePath)
+	if err != nil {
+		return "", err
+	}
+	if sign == "MD5" {
+		hash := md5.New()
+		_, _ = io.Copy(hash, file)
+		return hex.EncodeToString(hash.Sum(nil)), nil
+	} else {
+		hash := sha256.New()
+		_, _ = io.Copy(hash, file)
+		return hex.EncodeToString(hash.Sum(nil)), nil
+	}
+
+}
+
+func GetFileSize(filePath string) (int64, error) {
+	check_err := CheckPathFilename(filePath)
+	if check_err != nil {
+		return 0, check_err
+	}
+	fi, err := os.Stat(filePath)
+	if err != nil {
+		return 0, err
+	}
+	return fi.Size(), nil
+}
+
+// 字节的单位转换 保留两位小数
+func FormatFileSize(fileSize int64) (size string) {
+	if fileSize < 1024 {
+		//return strconv.FormatInt(fileSize, 10) + "B"
+		return fmt.Sprintf("%.2fB", float64(fileSize)/float64(1))
+	} else if fileSize < (1024 * 1024) {
+		return fmt.Sprintf("%.2fKB", float64(fileSize)/float64(1024))
+	} else if fileSize < (1024 * 1024 * 1024) {
+		return fmt.Sprintf("%.2fMB", float64(fileSize)/float64(1024*1024))
+	} else if fileSize < (1024 * 1024 * 1024 * 1024) {
+		return fmt.Sprintf("%.2fGB", float64(fileSize)/float64(1024*1024*1024))
+	} else if fileSize < (1024 * 1024 * 1024 * 1024 * 1024) {
+		return fmt.Sprintf("%.2fTB", float64(fileSize)/float64(1024*1024*1024*1024))
+	} else { //if fileSize < (1024 * 1024 * 1024 * 1024 * 1024 * 1024)
+		return fmt.Sprintf("%.2fEB", float64(fileSize)/float64(1024*1024*1024*1024*1024))
+	}
 }

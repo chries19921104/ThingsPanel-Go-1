@@ -8,7 +8,7 @@ type TpBatchValidate struct {
 	ProductId     string `json:"product_id,omitempty" alias:"产品id" valid:"MaxSize(36)"`
 	DeviceNumber  int    `json:"device_number,omitempty"  alias:"设备数量"`
 	GenerateFlag  string `json:"generate_flag,omitempty" alias:"生成标志 0-未生成 1-已生成" valid:"MaxSize(36)"`
-	Describle     string `json:"describle,omitempty" alias:"描述" valid:"MaxSize(255)"`
+	Describe      string `json:"describe,omitempty" alias:"描述" valid:"MaxSize(255)"`
 	CreatedTime   int64  `json:"created_time,omitempty"`
 	Remark        string `json:"remark,omitempty" alias:"备注" valid:"MaxSize(255)"`
 	AccessAddress string `json:"access_address,omitempty" alias:"接入地址" valid:"MaxSize(36)"`
@@ -17,9 +17,9 @@ type TpBatchValidate struct {
 type AddTpBatchValidate struct {
 	BatchNumber   string `json:"batch_number,omitempty" alias:"批次编号" valid:"Required;MaxSize(36)"`
 	ProductId     string `json:"product_id,omitempty" alias:"产品id" valid:"Required;MaxSize(36)"`
-	DeviceNumber  int    `json:"device_number,omitempty"  alias:"设备数量"`
+	DeviceNumber  int    `json:"device_number,omitempty"  alias:"设备数量" valid:"Required;Min(1);Max(10000)"` //最大及最小值
 	GenerateFlag  string `json:"generate_flag,omitempty" alias:"生成标志 0-未生成 1-已生成" valid:"MaxSize(36)"`
-	Describle     string `json:"describle,omitempty" alias:"描述" valid:"MaxSize(255)"`
+	Describe      string `json:"describe,omitempty" alias:"描述" valid:"MaxSize(255)"`
 	CreatedTime   int64  `json:"created_time,omitempty"`
 	Remark        string `json:"remark,omitempty" alias:"备注" valid:"MaxSize(255)"`
 	AccessAddress string `json:"access_address,omitempty" alias:"接入地址" valid:"MaxSize(36)"`
@@ -42,4 +42,10 @@ type RspTpBatchPaginationValidate struct {
 
 type TpBatchIdValidate struct {
 	Id string `json:"id"  gorm:"primaryKey" valid:"Required;MaxSize(36)"`
+}
+
+type ImportTpBatchValidate struct {
+	BatchNumber string `json:"batch_number,omitempty" alias:"批次编号" valid:"Required;MaxSize(36)"`
+	ProductId   string `json:"product_id,omitempty" alias:"产品id" valid:"Required;MaxSize(36)"`
+	File        string `json:"file,omitempty"  alias:"文件" valid:"Required;MaxSize(500)"`
 }

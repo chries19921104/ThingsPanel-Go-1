@@ -114,7 +114,7 @@ func (TpBatchController *TpBatchController) Add() {
 	TpBatch := models.TpBatch{
 		Id:            id,
 		BatchNumber:   AddTpBatchValidate.BatchNumber,
-		Describle:     AddTpBatchValidate.Describle,
+		Describe:      AddTpBatchValidate.Describe,
 		DeviceNumber:  AddTpBatchValidate.DeviceNumber,
 		CreatedTime:   time.Now().Unix(),
 		GenerateFlag:  AddTpBatchValidate.GenerateFlag,
@@ -230,5 +230,67 @@ func (TpBatchController *TpBatchController) Export() {
 		utils.SuccessWithDetailed(200, "success", filepath, map[string]string{}, (*context2.Context)(TpBatchController.Ctx))
 	} else {
 		utils.SuccessWithMessage(400, rsp_err.Error(), (*context2.Context)(TpBatchController.Ctx))
+	}
+}
+
+//导入
+func (TpBatchController *TpBatchController) Import() {
+	ImportTpBatchValidate := valid.ImportTpBatchValidate{}
+	err := json.Unmarshal(TpBatchController.Ctx.Input.RequestBody, &ImportTpBatchValidate)
+	if err != nil {
+		fmt.Println("参数解析失败", err.Error())
+	}
+	v := validation.Validation{}
+	status, _ := v.Valid(ImportTpBatchValidate)
+	if !status {
+		for _, err := range v.Errors {
+			// 获取字段别称
+			alias := gvalid.GetAlias(ImportTpBatchValidate, err.Field)
+			message := strings.Replace(err.Message, err.Field, alias, 1)
+			utils.SuccessWithMessage(1000, message, (*context2.Context)(TpBatchController.Ctx))
+			break
+		}
+		return
+	}
+	if err := utils.CheckPathFilename(ImportTpBatchValidate.File); err != nil || ImportTpBatchValidate.File == "" {
+		utils.SuccessWithMessage(1000, "文件不合法或不存在", (*context2.Context)(TpBatchController.Ctx))
+	}
+	if filetype := strings.Split(ImportTpBatchValidate.File, "."); len(filetype) == 3 && filetype[2] != "xlsx" {
+		utils.SuccessWithMessage(1000, "文件必须为2007版及以上的Excel", (*context2.Context)(TpBatchController.Ctx))
+	}
+	var TpBatchService services.TpBatchService
+	id := utils.GetUuid()
+	d, rsp_err := TpBatchService.Import(id, ImportTpBatchValidate.BatchNumber, ImportTpBatchValidate.ProductId, ImportTpBatchValidate.File)
+	if rsp_err != nil {
+		utils.SuccessWithMessage(400, rsp_err.Error(), (*context2.Context)(TpBatchController.Ctx))
+	}
+	TpBatch := models.TpBatch{
+		Id:           id,
+		BatchNumber:  ImportTpBatchValidate.BatchNumber,
+		CreatedTime:  time.Now().Unix(),
+		GenerateFlag: "1",
+		ProductId:    ImportTpBatchValidate.ProductId,
+		DeviceNumber: len(d),
+	}
+	tpbath, rsp_err1 := TpBatchService.AddTpBatch(TpBatch)
+	if rsp_err1 == nil {
+		data := make(map[string]interface{})
+		var TpGenerateDevicesService services.TpGenerateDeviceService
+		generated, err := TpGenerateDevicesService.AddBathTpGenerateDevice(d)
+		if err != nil || len(generated) == 0 {
+			utils.SuccessWithMessage(400, "生成数据失败", (*context2.Context)(TpBatchController.Ctx))
+		}
+		data["tpbath"] = tpbath
+		data["generate_devices"] = generated
+		utils.SuccessWithDetailed(200, "success", data, map[string]string{}, (*context2.Context)(TpBatchController.Ctx))
+	} else {
+		var err string
+		isTrue := strings.Contains(rsp_err.Error(), "23505")
+		if isTrue {
+			err = "批次编号不能重复！"
+		} else {
+			err = rsp_err1.Error()
+		}
+		utils.SuccessWithMessage(400, err, (*context2.Context)(TpBatchController.Ctx))
 	}
 }

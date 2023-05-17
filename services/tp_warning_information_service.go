@@ -6,6 +6,7 @@ import (
 	uuid "ThingsPanel-Go/utils"
 	valid "ThingsPanel-Go/validate"
 	"errors"
+	"strconv"
 	"time"
 
 	"github.com/beego/beego/v2/core/logs"
@@ -22,11 +23,12 @@ type TpWarningInformationService struct {
 }
 
 // 获取列表
-func (*TpWarningInformationService) GetTpWarningInformationList(PaginationValidate valid.TpWarningInformationPaginationValidate) ([]models.TpWarningInformation, int64, error) {
+func (*TpWarningInformationService) GetTpWarningInformationList(PaginationValidate valid.TpWarningInformationPaginationValidate, tenantId string) ([]models.TpWarningInformation, int64, error) {
 	var TpWarningInformations []models.TpWarningInformation
 	offset := (PaginationValidate.CurrentPage - 1) * PaginationValidate.PerPage
-	sqlWhere := "1=1"
+	sqlWhere := "1=1 and tenant_id = ?"
 	var paramList []interface{}
+	paramList = append(paramList, tenantId)
 	if PaginationValidate.Id != "" {
 		sqlWhere += " and id = ?"
 		paramList = append(paramList, PaginationValidate.Id)
@@ -34,6 +36,17 @@ func (*TpWarningInformationService) GetTpWarningInformationList(PaginationValida
 	if PaginationValidate.ProcessingResult != "" {
 		sqlWhere += " and processing_result = ?"
 		paramList = append(paramList, PaginationValidate.ProcessingResult)
+	}
+	if PaginationValidate.StartTime != "" && PaginationValidate.EndTime != "" {
+		// 字符串转int64
+		startTime, _ := strconv.ParseInt(PaginationValidate.StartTime, 10, 64)
+		endTime, _ := strconv.ParseInt(PaginationValidate.EndTime, 10, 64)
+		// 判断开始时间是否大于结束时间
+		if startTime > endTime {
+			return TpWarningInformations, 0, errors.New("开始时间不能大于结束时间")
+		}
+		paramList = append(paramList, startTime, endTime)
+		sqlWhere += " and created_at between ? and ?"
 	}
 	var count int64
 	psql.Mydb.Model(&models.TpWarningInformation{}).Where(sqlWhere, paramList...).Count(&count)
@@ -59,13 +72,13 @@ func (*TpWarningInformationService) AddTpWarningInformation(tp_warning_informati
 }
 
 // 修改数据
-func (*TpWarningInformationService) EditTpWarningInformation(tp_warning_information valid.TpWarningInformationValidate) (valid.TpWarningInformationValidate, error) {
+func (*TpWarningInformationService) EditTpWarningInformation(tp_warning_information valid.TpWarningInformationValidate, tenantId string) (valid.TpWarningInformationValidate, error) {
 	var warningInformationMap = map[string]interface{}{
 		"ProcessingResult":       tp_warning_information.ProcessingResult,
 		"ProcessingInstructions": tp_warning_information.ProcessingInstructions,
 		"ProcessingTime":         time.Now().Format("2006/01/02 15:04:05"),
 	}
-	result := psql.Mydb.Model(&models.TpWarningInformation{}).Where("id = ?", tp_warning_information.Id).Updates(&warningInformationMap)
+	result := psql.Mydb.Model(&models.TpWarningInformation{}).Where("id = ? and tenant_id = ?", tp_warning_information.Id, tenantId).Updates(&warningInformationMap)
 	if result.Error != nil {
 		return tp_warning_information, result.Error
 	}
@@ -73,7 +86,7 @@ func (*TpWarningInformationService) EditTpWarningInformation(tp_warning_informat
 }
 
 // 批量处理
-func (*TpWarningInformationService) BatchProcessing(batchProcessing valid.BatchProcessingValidate) error {
+func (*TpWarningInformationService) BatchProcessing(batchProcessing valid.BatchProcessingValidate, tenantId string) error {
 	tx := psql.Mydb.Begin()
 	for _, id := range batchProcessing.Id {
 		var warningInformationMap = make(map[string]interface{})
@@ -87,7 +100,7 @@ func (*TpWarningInformationService) BatchProcessing(batchProcessing valid.BatchP
 			return errors.New("处理状态不正确")
 		}
 		warningInformationMap["ProcessingTime"] = time.Now().Format("2006/01/02 15:04:05")
-		err := tx.Model(&models.TpWarningInformation{}).Where("id = ?", id).Updates(&warningInformationMap).Error
+		err := tx.Model(&models.TpWarningInformation{}).Where("id = ? and tenant_id = ?", id, tenantId).Updates(&warningInformationMap).Error
 		if err != nil {
 			tx.Rollback()
 			return err
