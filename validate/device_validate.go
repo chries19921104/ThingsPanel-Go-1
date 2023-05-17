@@ -153,6 +153,7 @@ type DeviceIdListValidate struct {
 	DeviceIdList []string `json:"device_id_list" alias:"设备id" valid:"Required;MaxSize(36)"`
 }
 
+
 type RspDevicePaginationValidate struct {
 	CurrentPage int                      `json:"current_page"  alias:"当前页" valid:"Required;Min(1)"`
 	PerPage     int                      `json:"per_page"  alias:"每页页数" valid:"Required;Max(10000)"`
@@ -166,3 +167,8 @@ type DevicePaginationValidate struct {
 	Name           string `json:"name"  alias:"名称" valid:"MaxSize(36)"`
 	ProductId      string `json:"product_id,omitempty" alias:"产品id"`
 }
+type DeviceListByAssetValidate struct {
+	AssetId string `json:"asset_id" alias:"分组id" valid:"Required;MaxSize(36)"`
+}
+
+

@@ -144,6 +144,7 @@ func init() {
 		web.NSRouter("/device/cascade", &controllers.DeviceController{}, "*:GetDeviceByCascade"),
 		web.NSRouter("/device/map", &controllers.DeviceController{}, "*:DeviceMapList"),
 		web.NSRouter("/device/status", &controllers.DeviceController{}, "*:DeviceStatus"),
+		web.NSRouter("/device/page/list", &controllers.DeviceController{}, "*:PageList"), //shebei-ck
 
 		//可视化列表分页查询
 		web.NSRouter("/dashboard/index", &controllers.DashBoardController{}, "*:Index"), //keshihua-ck
@@ -386,6 +387,34 @@ func init() {
 		web.NSRouter("/v1/automation/log/detail/list", &controllers.TpAutomationLogDetailController{}, "*:List"),
 		web.NSRouter("/v1/scenario/log/list", &controllers.TpScenarioLogController{}, "*:List"),
 		web.NSRouter("/v1/scenario/log/detail/list", &controllers.TpScenarioLogDetailController{}, "*:List"),
+
+		//锅型
+		web.NSRouter("/v1/pot/index", &controllers.PotTypeController{}, "*:Index"),
+		web.NSRouter("/v1/pot/add", &controllers.PotTypeController{}, "*:Add"),
+		web.NSRouter("/v1/pot/edit", &controllers.PotTypeController{}, "*:Edit"),
+		web.NSRouter("/v1/pot/delete", &controllers.PotTypeController{}, "*:Delete"),
+
+
+		//配方
+		web.NSRouter("/v1/recipe/index", &controllers.RecipeController{}, "*:Index"),
+		web.NSRouter("/v1/recipe/add", &controllers.RecipeController{}, "*:Add"),
+		web.NSRouter("/v1/recipe/edit", &controllers.RecipeController{}, "*:Edit"),
+		web.NSRouter("/v1/recipe/delete", &controllers.RecipeController{}, "*:Delete"),
+		web.NSRouter("/v1/recipe/send/to/mqtt", &controllers.RecipeController{}, "*:SendToHDL"),
+		web.NSRouter("/v1/recipe/search/materials", &controllers.RecipeController{}, "*:GetMaterialList"),
+		//web.NSRouter("/v1/recipe/taste/materials", &controllers.RecipeController{}, "*:GetTasteMaterialList"),
+
+		web.NSRouter("/v1/recipe/delete/materials", &controllers.RecipeController{}, "*:DeleteMaterial"),
+		web.NSRouter("/v1/recipe/delete/taste", &controllers.RecipeController{}, "*:DeleteTaste"),
+		web.NSRouter("/v1/recipe/search/taste", &controllers.RecipeController{}, "*:GetTasteList"),
+		web.NSRouter("/v1/recipe/get/material", &controllers.RecipeController{}, "*:GetMaterialByName"),
+		web.NSRouter("/v1/recipe/material/create", &controllers.RecipeController{}, "*:CreateMaterial"),
+		web.NSRouter("/v1/recipe/taste/create", &controllers.RecipeController{}, "*:CreateTaste"),
+		web.NSRouter("/v1/recipe/check/taste", &controllers.RecipeController{}, "*:CheckPosTasteIdIsRepeat"),
+
+		//加汤数据管理
+		web.NSRouter("/v1/soup/data/index", &controllers.SoupDataController{}, "*:Index"),
+		web.NSRouter("/v1/soup/data/export", &controllers.SoupDataController{}, "*:Export"),
 	)
 
 	// 图表推送数据

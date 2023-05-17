@@ -74,8 +74,11 @@ func listenMQTT() {
 		_ = p.Submit(func() {
 			OtaDevice.OtaToinfromMsgProcOther(m.Payload(), m.Topic())
 		})
+	}, func(c mqtt.Client, m mqtt.Message) {
+		_ = p.Submit(func() {
+			TSKVS.HdlOrderMsgProc(m.Payload(), m.Topic())
+		})
 	})
-
 }
 
 //废弃
