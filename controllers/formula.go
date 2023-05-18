@@ -386,6 +386,7 @@ func (pot *RecipeController) SendToHDL() {
 		}
 		return
 	}
+	SendToMQTTValidator.AssetId = "10000"
 	Recipe := services.RecipeService{}
 	list, err := Recipe.GetSendToMQTTData(SendToMQTTValidator.AssetId)
 	if err != nil {
