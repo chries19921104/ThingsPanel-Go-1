@@ -27,6 +27,7 @@ type Taste struct {
 	PotTypeId      string   `json:"PotTypeId"`
 	MaterialIdList []string `json:"MaterialIdList"`
 	RecipeId       string   `json:"RecipeId"`
+	BottomPotId    string   `json:"BottomPotId"`
 }
 
 type Materials struct {

@@ -15,7 +15,8 @@ type Taste struct {
 	RecipeID         string       `gorm:"column:recipe_id"`
 	PotTypeId        string       `gorm:"column:pot_type_id"`
 	TasteMaterialArr []*Materials `gorm:"-"`
-	MaterialIdList    string       `gorm:"column:material_id_list"`
+	MaterialIdList   string       `gorm:"column:material_id_list"`
+	BottomPotId      string       `gorm:"column:bottom_pot_id"`
 }
 
 func (t *Taste) TableName() string {

@@ -189,6 +189,7 @@ func (pot *RecipeController) Add() {
 			CreateAt:       time.Now().Unix(),
 			RecipeID:       recipeId,
 			PotTypeId:      v.PotTypeId,
+			BottomPotId:    addRecipeValidate.BottomPotId,
 			MaterialIdList: strings.Join(arr, ","),
 		}
 		switch v.Action {
@@ -566,7 +567,7 @@ func (pot *RecipeController) CheckPosTasteIdIsRepeat() {
 	}
 
 	var recipeService services.RecipeService
-	isExist, err := recipeService.CheckPosTasteIdIsRepeat(checkValidator.TasteId, checkValidator.Action, checkValidator.PotTypeId)
+	isExist, err := recipeService.CheckPosTasteIdIsRepeat(checkValidator.TasteId, checkValidator.Action, checkValidator.PotTypeId, checkValidator.BottomPotId)
 
 	if err != nil {
 		response.SuccessWithMessage(400, err.Error(), (*context2.Context)(pot.Ctx))

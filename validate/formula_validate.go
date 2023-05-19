@@ -50,6 +50,7 @@ type Taste struct {
 	Action           string      `json:"Action"`
 	Operate          string      `json:"Operate"`
 	PotTypeId        string      `json:"PotTypeId"`
+	BottomPotId      string      `json:"BottomPotId"`
 	TasteMaterialArr []*Material `json:"TasteMaterialArr" alias:"口味物料"`
 }
 
@@ -128,7 +129,8 @@ type CreateTasteValidator struct {
 }
 
 type CheckValidator struct {
-	TasteId   string `json:"taste_id" valid:"Required"`
-	Action    string `json:"action" `
-	PotTypeId string `json:"pot_type_id"`
+	TasteId     string `json:"taste_id" valid:"Required"`
+	Action      string `json:"action" `
+	PotTypeId   string `json:"pot_type_id"`
+	BottomPotId string `json:"bottom_pot_id"`
 }

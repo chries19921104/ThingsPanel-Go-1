@@ -365,6 +365,7 @@ func (*RecipeService) GetSendToMQTTData(assetId string) (*mqtt.SendConfig, error
 			PotTypeId:      v.PotTypeId,
 			RecipeId:       v.RecipeID,
 			MaterialIdList: strings.Split(v.MaterialIdList, ","),
+			BottomPotId:    v.BottomPotId,
 		}
 		tasteMaterialIdArr[v.TasteId] = append(tasteMaterialIdArr[v.TasteId], v.Id)
 	}
@@ -494,13 +495,13 @@ func (*RecipeService) CheckBottomIdIsRepeat(bottomId, recipeId string, action st
 
 }
 
-func (*RecipeService) CheckPosTasteIdIsRepeat(list5 string, action string, potTypeIs string) (bool, error) {
+func (*RecipeService) CheckPosTasteIdIsRepeat(list5 string, action string, potTypeIs string, BottomPotId string) (bool, error) {
 	if len(list5) > 0 {
 		list := make([]*models.Taste, 0)
 		if action == "GET" {
 			return false, nil
 		}
-		err := psql.Mydb.Where("taste_id = ?", list5).Where("pot_type_id = ?", potTypeIs).First(&list).Error
+		err := psql.Mydb.Where("taste_id = ?", list5).Where("pot_type_id = ? and bottom_pot_id = ?", potTypeIs, BottomPotId).First(&list).Error
 		if err != nil {
 			if !errors.Is(err, gorm.ErrRecordNotFound) {
 				return false, err
