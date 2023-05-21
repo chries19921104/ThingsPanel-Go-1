@@ -360,10 +360,10 @@ func (*RecipeService) GetSendToMQTTData(assetId string) (*mqtt.SendConfig, error
 	tasteMaterialIdArr := make(map[string][]string, 0)
 	for _, v := range tasteList {
 		tmpTasteMap[v.TasteId] = &mqtt.Taste{
-			Name:           v.Name,
-			TasteId:        v.TasteId,
-			PotTypeId:      v.PotTypeId,
-			RecipeId:       v.RecipeID,
+			Name:      v.Name,
+			TasteId:   v.TasteId,
+			PotTypeId: v.PotTypeId,
+			//RecipeId:       v.RecipeID,
 			MaterialIdList: strings.Split(v.MaterialIdList, ","),
 			BottomPotId:    v.BottomPotId,
 		}
