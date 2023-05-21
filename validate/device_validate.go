@@ -184,3 +184,7 @@ type DeviceCommandSendValid struct {
 	CommandName       string `json:"command_name,omitempty"`
 	Desc              string `json:"desc,omitempty"`
 }
+
+type DeviceListByAssetValidate struct {
+	AssetId string `json:"asset_id" alias:"分组id" valid:"Required;MaxSize(36)"`
+}

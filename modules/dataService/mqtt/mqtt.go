@@ -16,12 +16,12 @@ var running bool
 var _client mqtt.Client
 
 func Listen(broker, username, password, clientid string, msgProc func(c mqtt.Client, m mqtt.Message),
-	msgProcOther func(c mqtt.Client, m mqtt.Message),
-	gatewayMsgProc func(c mqtt.Client, m mqtt.Message),
-	otaProgressMsgProc func(c mqtt.Client, m mqtt.Message),
-	otaToinformMsgProc func(c mqtt.Client, m mqtt.Message),
-	deviceEvent func(c mqtt.Client, m mqtt.Message),
-) (err error) {
+            msgProcOther func(c mqtt.Client, m mqtt.Message),
+            gatewayMsgProc func(c mqtt.Client, m mqtt.Message),
+            otaProgressMsgProc func(c mqtt.Client, m mqtt.Message),
+            otaToinformMsgProc func(c mqtt.Client, m mqtt.Message),
+            deviceEvent func(c mqtt.Client, m mqtt.Message),
+            eventMsgProc func(c mqtt.Client, m mqtt.Message)) (err error) {
 	running = false
 	if _client == nil {
 		// 掉线重连
@@ -35,7 +35,7 @@ func Listen(broker, username, password, clientid string, msgProc func(c mqtt.Cli
 					i++
 					fmt.Println("MQTT掉线重连...", i)
 				} else {
-					subscribe(msgProcOther, gatewayMsgProc, otaProgressMsgProc, otaToinformMsgProc, deviceEvent)
+					subscribe(msgProcOther, gatewayMsgProc, otaProgressMsgProc, otaToinformMsgProc, deviceEvent,eventMsgProc)
 					break
 				}
 			}
@@ -69,19 +69,18 @@ func Listen(broker, username, password, clientid string, msgProc func(c mqtt.Cli
 			}
 			time.Sleep(5 * time.Second)
 		}
-		subscribe(msgProcOther, gatewayMsgProc, otaProgressMsgProc, otaToinformMsgProc, deviceEvent)
-
+		subscribe(msgProcOther, gatewayMsgProc, otaProgressMsgProc, otaToinformMsgProc, deviceEvent, eventMsgProc)
 	}
 	return
 }
 
 // mqtt订阅
-func subscribe(
-	msgProcOther func(c mqtt.Client, m mqtt.Message),
-	gatewayMsgProc func(c mqtt.Client, m mqtt.Message),
-	otaProgressMsgProc func(c mqtt.Client, m mqtt.Message),
-	otaToinformMsgProc func(c mqtt.Client, m mqtt.Message),
-	deviceEvent func(c mqtt.Client, m mqtt.Message)) {
+func subscribe(msgProcOther func(c mqtt.Client, m mqtt.Message),
+               gatewayMsgProc func(c mqtt.Client, m mqtt.Message),
+               otaProgressMsgProc func(c mqtt.Client, m mqtt.Message),
+               otaToinformMsgProc func(c mqtt.Client, m mqtt.Message),
+               deviceEvent func(c mqtt.Client, m mqtt.Message),
+               eventMsgProc func(c mqtt.Client, m mqtt.Message)) {
 	// 订阅默认，直连设备
 	if token := _client.Subscribe(viper.GetString("mqtt.topicToSubscribe"), byte(viper.GetUint("mqtt.qos")), nil); token.Wait() &&
 		token.Error() != nil {
@@ -123,10 +122,17 @@ func subscribe(
 		fmt.Println(token.Error())
 		os.Exit(1)
 	}
-
 	//订阅设备上报的事件
 	if token := _client.Subscribe(viper.GetString("mqtt.topicToEvent"), byte(1), func(c mqtt.Client, m mqtt.Message) {
 		deviceEvent(c, m)
+  }); token.Wait() &&
+		token.Error() != nil {
+		fmt.Println(token.Error())
+		os.Exit(1)
+	}
+   //订阅海底捞订单
+	if token := _client.Subscribe("device/event", byte(0), func(c mqtt.Client, m mqtt.Message) {
+		eventMsgProc(c, m)
 	}); token.Wait() &&
 		token.Error() != nil {
 		fmt.Println(token.Error())
