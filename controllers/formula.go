@@ -394,7 +394,7 @@ func (pot *RecipeController) SendToHDL() {
 		response.SuccessWithMessage(400, err.Error(), (*context2.Context)(pot.Ctx))
 		return
 	}
-	err = Recipe.SplitSendMqtt(list, SendToMQTTValidator.AccessToken, 3)
+	err = Recipe.SplitSendMqtt(list, SendToMQTTValidator.AccessToken, 5)
 	if err != nil {
 		response.SuccessWithMessage(400, err.Error(), (*context2.Context)(pot.Ctx))
 		return
