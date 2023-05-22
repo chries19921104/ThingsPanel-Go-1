@@ -210,12 +210,13 @@ func (*TSKVService) HdlOrderMsgProc(body []byte, topic string) bool {
 		return false
 	}
 	logs.Info(data)
-	var shop models.Asset
-	err = psql.Mydb.Where("id = ?", data.StoreID).First(&shop).Error
-	if err != nil {
-		logs.Error(err)
-		return false
-	}
+	// 不判断店铺，店铺名称直接存入id
+	// var shop models.Asset
+	// err = psql.Mydb.Where("id = ?", data.StoreID).First(&shop).Error
+	// if err != nil {
+	// 	logs.Error(err)
+	// 	return false
+	// }
 	var recipe models.Recipe
 	err = psql.Mydb.Select("bottom_pot").Where("id = ?", data.PotID).First(&recipe).Error
 	if err != nil {
@@ -232,7 +233,7 @@ func (*TSKVService) HdlOrderMsgProc(body []byte, topic string) bool {
 
 	dataModel := &models.AddSoupData{
 		Id:             uuid.GetUuid(),
-		ShopName:       shop.Name,
+		ShopName:       data.StoreID,
 		OrderSn:        data.OrderID,
 		BottomId:       data.PotID,
 		BottomPot:      recipe.BottomPot,
