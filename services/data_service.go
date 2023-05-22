@@ -6,6 +6,7 @@ import (
 	"ThingsPanel-Go/utils"
 	valid "ThingsPanel-Go/validate"
 	"fmt"
+
 	"github.com/beego/beego/v2/core/logs"
 	"gorm.io/gorm"
 )
@@ -24,17 +25,18 @@ func (*SoupDataService) GetList(PaginationValidate valid.SoupDataPaginationValid
 	var SoupData []models.AddSoupDataValue
 	offset := (PaginationValidate.CurrentPage - 1) * PaginationValidate.PerPage
 	db := psql.Mydb.Model(&models.AddSoupData{})
-	if PaginationValidate.ShopName != "" {
-		asset := &models.Asset{}
-		if err := psql.Mydb.Model(&models.Asset{}).Where("name like ?", "%"+PaginationValidate.ShopName+"%").First(asset).Error; err != nil {
-			return false, nil, 0
-		}
-		db = db.Where("add_soup_data.shop_id = ?", asset.ID)
-	}
+	// if PaginationValidate.ShopName != "" {
+	// 	asset := &models.Asset{}
+	// 	if err := psql.Mydb.Model(&models.Asset{}).Where("name like ?", "%"+PaginationValidate.ShopName+"%").First(asset).Error; err != nil {
+	// 		return false, nil, 0
+	// 	}
+	// 	db = db.Where("add_soup_data.shop_id = ?", asset.ID)
+	// }
 
 	var count int64
 	db.Count(&count)
-	result := db.Model(new(models.AddSoupData)).Select("add_soup_data.bottom_pot,add_soup_data.order_sn,add_soup_data.table_number,add_soup_data.order_time,add_soup_data.soup_start_time,add_soup_data.soup_end_time,add_soup_data.feeding_start_time,add_soup_data.feeding_end_time,add_soup_data.turning_pot_end_time,add_soup_data.turning_pot_end_time,asset.name").Joins("left join recipe on add_soup_data.bottom_id = recipe.bottom_pot_id").Joins("left join asset on add_soup_data.shop_id = asset.id").Limit(PaginationValidate.PerPage).Offset(offset).Find(&SoupData)
+	result := db.Model(new(models.AddSoupData)).Select("add_soup_data.bottom_pot,add_soup_data.order_sn,add_soup_data.table_number,add_soup_data.order_time,add_soup_data.soup_start_time,add_soup_data.soup_end_time,add_soup_data.feeding_start_time,add_soup_data.feeding_end_time,add_soup_data.turning_pot_end_time,add_soup_data.turning_pot_end_time,add_soup_data.name").Limit(PaginationValidate.PerPage).Offset(offset).Find(&SoupData)
+	//result := db.Model(new(models.AddSoupData)).Select("add_soup_data.bottom_pot,add_soup_data.order_sn,add_soup_data.table_number,add_soup_data.order_time,add_soup_data.soup_start_time,add_soup_data.soup_end_time,add_soup_data.feeding_start_time,add_soup_data.feeding_end_time,add_soup_data.turning_pot_end_time,add_soup_data.turning_pot_end_time,asset.name").Joins("left join recipe on add_soup_data.bottom_id = recipe.bottom_pot_id").Joins("left join asset on add_soup_data.shop_id = asset.id").Limit(PaginationValidate.PerPage).Offset(offset).Find(&SoupData)
 	if result.Error != nil {
 		logs.Error(result.Error, gorm.ErrRecordNotFound)
 		return false, SoupData, 0
@@ -57,17 +59,19 @@ func (*SoupDataService) Paginate(shopName string, limit int, offset int) ([]mode
 	}
 	filters := map[string]interface{}{}
 
-	if shopName != "" { //店铺id
-		Asset := models.Asset{}
-		if err := psql.Mydb.Where("name like ?", "%"+shopName+"%").First(&Asset).Error; err != nil {
-			return nil, 0
-		}
-		filters["asd.shop_id"] = Asset.ID
-	}
+	// if shopName != "" { //店铺id
+	// 	Asset := models.Asset{}
+	// 	if err := psql.Mydb.Where("name like ?", "%"+shopName+"%").First(&Asset).Error; err != nil {
+	// 		return nil, 0
+	// 	}
+	// 	filters["asd.shop_id"] = Asset.ID
+	// }
 
 	SQLWhere, params := utils.TsKvFilterToSql(filters)
 
-	countsql := "SELECT Count(*) AS count FROM add_soup_data as asd LEFT JOIN asset as a ON asd.shop_id=a.id   " + SQLWhere
+	//countsql := "SELECT Count(*) AS count FROM add_soup_data as asd LEFT JOIN asset as a ON asd.shop_id=a.id   " + SQLWhere
+	countsql := "SELECT Count(*) AS count FROM add_soup_data" + SQLWhere
+
 	if err := result2.Raw(countsql, params...).Count(&count).Error; err != nil {
 		logs.Info(err.Error())
 		return tsk, 0
@@ -78,8 +82,11 @@ func (*SoupDataService) Paginate(shopName string, limit int, offset int) ([]mode
 	//LEFT JOIN asset  ON asset.id=device.asset_id
 	//LEFT JOIN business ON business.id=asset.business_id
 	//WHERE 1=1  and ts_kv.ts >= 1654790400000000 and ts_kv.ts < 1655481599000000 ORDER BY ts_kv.ts DESC limit 10 offset 0
-	SQL := `select add_soup_data.order_sn,asset.name,add_soup_data.table_number,add_soup_data.order_time,add_soup_data.bottom_pot,
-add_soup_data.soup_start_time,add_soup_data.soup_end_time,add_soup_data.feeding_start_time,add_soup_data.feeding_end_time,add_soup_data.turning_pot_end_time ,asset.name FROM add_soup_data  LEFT JOIN asset  ON add_soup_data.shop_id=asset.id LEFT JOIN recipe on add_soup_data.bottom_id = recipe.bottom_pot_id` + SQLWhere
+	//SQL := `select add_soup_data.order_sn,asset.name,add_soup_data.table_number,add_soup_data.order_time,add_soup_data.bottom_pot,
+	//add_soup_data.soup_start_time,add_soup_data.soup_end_time,add_soup_data.feeding_start_time,add_soup_data.feeding_end_time,add_soup_data.turning_pot_end_time ,asset.name FROM add_soup_data  LEFT JOIN asset  ON add_soup_data.shop_id=asset.id LEFT JOIN recipe on add_soup_data.bottom_id = recipe.bottom_pot_id` + SQLWhere
+	SQL := `select add_soup_data.order_sn,add_soup_data.table_number,add_soup_data.order_time,add_soup_data.bottom_pot,
+add_soup_data.soup_start_time,add_soup_data.soup_end_time,add_soup_data.feeding_start_time,add_soup_data.feeding_end_time,add_soup_data.turning_pot_end_time ,add_soup_data.name FROM add_soup_data ` + SQLWhere
+
 	if limit > 0 && offset >= 0 {
 		SQL = fmt.Sprintf("%s limit ? offset ? ", SQL)
 		params = append(params, limit, offset)

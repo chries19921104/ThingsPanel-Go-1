@@ -217,13 +217,14 @@ func (*TSKVService) HdlOrderMsgProc(body []byte, topic string) bool {
 	// 	logs.Error(err)
 	// 	return false
 	// }
-	var recipe models.Recipe
-	err = psql.Mydb.Select("bottom_pot").Where("id = ?", data.PotID).First(&recipe).Error
-	if err != nil {
-		logs.Error(err)
-		return false
+	//不判断 直接存入
+	// var recipe models.Recipe
+	// err = psql.Mydb.Select("bottom_pot").Where("id = ?", data.PotID).First(&recipe).Error
+	// if err != nil {
+	// 	logs.Error(err)
+	// 	return false
 
-	}
+	// }
 
 	orderTimeParse, _ := time.ParseInLocation("2006-01-02 15:04:05", data.OrderTime, time.Local)
 	SoupAddingStartTimeParse, _ := time.ParseInLocation("2006-01-02 15:04:05", data.SoupAddingStartTime, time.Local)
@@ -236,7 +237,7 @@ func (*TSKVService) HdlOrderMsgProc(body []byte, topic string) bool {
 		ShopName:       data.StoreID,
 		OrderSn:        data.OrderID,
 		BottomId:       data.PotID,
-		BottomPot:      recipe.BottomPot,
+		BottomPot:      data.PotID,
 		TableNumber:    data.TableNumber,
 		OrderTime:      orderTimeParse,
 		SoupStartTime:  SoupAddingStartTimeParse,
