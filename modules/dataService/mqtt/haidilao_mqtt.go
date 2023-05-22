@@ -65,6 +65,7 @@ type HdlOrder struct {
 	OrderTime                  string `json:"orderTime"`
 	SoupAddingStartTime        string `json:"soupAddingStartTime"`
 	SoupAddingFinishTime       string `json:"soupAddingFinishTime"`
+	IngredientAddingStartTime  string `json:"ingredientAddingStartTime"`
 	IngredientAddingFinishTime string `json:"ingredientAddingFinishTime"`
 	PotSwitchingFinishTime     string `json:"potSwitchingFinishTime"`
 	CreationTime               string `json:"creationTime"`

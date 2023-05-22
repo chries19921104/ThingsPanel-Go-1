@@ -180,3 +180,4 @@ INSERT INTO "pot_type" ("id","name","image","create_at","is_del","soup_standard"
 
 ALTER TABLE public.taste ADD bottom_pot_id varchar(100) NULL;
 COMMENT ON COLUMN public.taste.bottom_pot_id IS '订单配方id';
+ALTER TABLE public.add_soup_data ALTER COLUMN table_number TYPE varchar(15) USING table_number::varchar;

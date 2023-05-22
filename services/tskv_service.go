@@ -229,23 +229,26 @@ func (*TSKVService) HdlOrderMsgProc(body []byte, topic string) bool {
 	orderTimeParse, _ := time.ParseInLocation("2006-01-02 15:04:05", data.OrderTime, time.Local)
 	SoupAddingStartTimeParse, _ := time.ParseInLocation("2006-01-02 15:04:05", data.SoupAddingStartTime, time.Local)
 	SoupAddingFinishTimeParse, _ := time.ParseInLocation("2006-01-02 15:04:05", data.SoupAddingFinishTime, time.Local)
+	FeedingStartTimeParse, _ := time.ParseInLocation("2006-01-02 15:04:05", data.IngredientAddingStartTime, time.Local)
+	FeedingEndTimeParse, _ := time.ParseInLocation("2006-01-02 15:04:05", data.IngredientAddingFinishTime, time.Local)
 	PotSwitchingFinishTimeParse, _ := time.ParseInLocation("2006-01-02 15:04:05", data.PotSwitchingFinishTime, time.Local)
 	CreationTimeParse, _ := time.ParseInLocation("2006-01-02 15:04:05", data.CreationTime, time.Local)
 
 	dataModel := &models.AddSoupData{
-		Id:             uuid.GetUuid(),
-		ShopName:       data.StoreID,
-		OrderSn:        data.OrderID,
-		BottomId:       data.PotID,
-		BottomPot:      data.PotID,
-		TableNumber:    data.TableNumber,
-		OrderTime:      orderTimeParse,
-		SoupStartTime:  SoupAddingStartTimeParse,
-		SoupEndTime:    SoupAddingFinishTimeParse,
-		FeedingEndTime: PotSwitchingFinishTimeParse,
-		TurningPotEnd:  CreationTimeParse,
-		ShopId:         data.StoreID,
-		CreateAt:       time.Now().Local(),
+		Id:               uuid.GetUuid(),
+		ShopName:         data.StoreID,
+		OrderSn:          data.OrderID,
+		BottomId:         data.PotID,
+		BottomPot:        data.PotID,
+		TableNumber:      data.TableNumber,
+		OrderTime:        orderTimeParse,
+		SoupStartTime:    SoupAddingStartTimeParse,
+		SoupEndTime:      SoupAddingFinishTimeParse,
+		FeedingStartTime: FeedingStartTimeParse,
+		FeedingEndTime:   FeedingEndTimeParse,
+		TurningPotEnd:    PotSwitchingFinishTimeParse,
+		ShopId:           data.StoreID,
+		CreateAt:         CreationTimeParse,
 	}
 
 	err = psql.Mydb.Create(dataModel).Error
