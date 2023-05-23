@@ -35,7 +35,7 @@ func (*SoupDataService) GetList(PaginationValidate valid.SoupDataPaginationValid
 
 	var count int64
 	db.Count(&count)
-	result := db.Model(new(models.AddSoupData)).Select("add_soup_data.bottom_pot,add_soup_data.order_sn,add_soup_data.table_number,add_soup_data.order_time,add_soup_data.soup_start_time,add_soup_data.soup_end_time,add_soup_data.feeding_start_time,add_soup_data.feeding_end_time,add_soup_data.turning_pot_end_time,add_soup_data.turning_pot_end_time,add_soup_data.name").Limit(PaginationValidate.PerPage).Offset(offset).Find(&SoupData)
+	result := db.Model(new(models.AddSoupData)).Select("add_soup_data.bottom_pot,add_soup_data.order_sn,add_soup_data.table_number,add_soup_data.order_time,add_soup_data.soup_start_time,add_soup_data.soup_end_time,add_soup_data.feeding_start_time,add_soup_data.feeding_end_time,add_soup_data.turning_pot_end_time,add_soup_data.turning_pot_end_time,add_soup_data.name order by create_at desc").Limit(PaginationValidate.PerPage).Offset(offset).Find(&SoupData)
 	//result := db.Model(new(models.AddSoupData)).Select("add_soup_data.bottom_pot,add_soup_data.order_sn,add_soup_data.table_number,add_soup_data.order_time,add_soup_data.soup_start_time,add_soup_data.soup_end_time,add_soup_data.feeding_start_time,add_soup_data.feeding_end_time,add_soup_data.turning_pot_end_time,add_soup_data.turning_pot_end_time,asset.name").Joins("left join recipe on add_soup_data.bottom_id = recipe.bottom_pot_id").Joins("left join asset on add_soup_data.shop_id = asset.id").Limit(PaginationValidate.PerPage).Offset(offset).Find(&SoupData)
 	if result.Error != nil {
 		logs.Error(result.Error, gorm.ErrRecordNotFound)
