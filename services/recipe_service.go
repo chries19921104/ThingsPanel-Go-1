@@ -86,18 +86,18 @@ func (*RecipeService) AddRecipe(pot models.Recipe, list1 []models.Materials, lis
 // 修改数据
 func (*RecipeService) EditRecipe(pot valid.EditRecipeValidator, list1 []models.Materials, list2 []*models.Taste, list3 []string, list4 []string) error {
 	taste := ""
-	if len(pot.Tastes) == 0 {
-		taste = ""
-	} else {
-		taste = strings.Join(pot.Tastes, ",")
-	}
+	//if len(pot.Tastes) == 0 {
+	//	taste = ""
+	//} else {
+	//	taste = strings.Join(pot.Tastes, ",")
+	//}
 
 	err := psql.Mydb.Transaction(func(tx *gorm.DB) error {
 
 		err := tx.Exec("UPDATE recipe SET bottom_pot_id = $1,"+
-			"bottom_pot= $2,pot_type_id= $3,materials= $4,bottom_properties = $5,"+
-			"soup_standard = $6,taste = $7 ,update_at = $8 ,taste_materials = $9 WHERE id = $10",
-			pot.BottomPotId, pot.BottomPot, pot.PotTypeId, strings.Join(pot.Materials, ","), pot.BottomProperties, pot.SoupStandard, taste, time.Now(), strings.Join(pot.TasteMaterials, ","), pot.Id).Error
+			"bottom_pot= $2,pot_type_id= $3,bottom_properties = $4,"+
+			"soup_standard = $5 ,update_at = $6 ,taste_materials = $7 WHERE id = $8",
+			pot.BottomPotId, pot.BottomPot, pot.PotTypeId, pot.BottomProperties, pot.SoupStandard, taste, time.Now(), pot.Id).Error
 		if err != nil {
 			return err
 		}

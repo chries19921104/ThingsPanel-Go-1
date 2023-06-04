@@ -10,8 +10,8 @@ type Recipe struct {
 	BottomPot        string    `gorm:"column:bottom_pot"`
 	PotTypeId        string    `gorm:"column:pot_type_id"`
 	PotTypeName      string    `gorm:"column:pot_type_name"`
-	Materials        string    `gorm:"column:materials"`
-	Taste            string    `gorm:"column:taste"`
+	//Materials        string    `gorm:"column:materials"`
+	//Taste            string    `gorm:"column:taste"`
 	BottomProperties string    `gorm:"column:bottom_properties"`
 	SoupStandard     int64     `gorm:"column:soup_standard"`
 	CreateAt         int64     `gorm:"column:create_at"`
