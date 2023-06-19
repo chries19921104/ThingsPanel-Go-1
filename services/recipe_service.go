@@ -41,7 +41,7 @@ func (*RecipeService) GetRecipeList(PaginationValidate valid.RecipePaginationVal
 	if PaginationValidate.Id != "" {
 		db = db.Where("recipe.id = ?", PaginationValidate.Id)
 	}
-	db = db.Select("recipe.id,recipe.bottom_pot_id,recipe.bottom_pot,recipe.pot_type_id,recipe.materials,recipe.taste,recipe.taste_materials,recipe.bottom_properties,recipe.soup_standard,pot_type.name").Joins("left join pot_type on recipe.pot_type_id = pot_type.pot_type_id").Where("recipe.is_del", false)
+	db = db.Select("recipe.id,recipe.bottom_pot_id,recipe.bottom_pot,recipe.pot_type_id,recipe.taste_materials,recipe.bottom_properties,recipe.soup_standard,pot_type.name").Joins("left join pot_type on recipe.pot_type_id = pot_type.pot_type_id").Where("recipe.is_del", false)
 
 	var count int64
 	db.Count(&count)
