@@ -262,7 +262,8 @@ func (*RecipeService) GetSendToMQTTData(assetId string) (*mqtt.SendConfig, error
 		Recipe:    make([]*mqtt.Recipe, 0),
 	}
 	var Recipe []*models.Recipe
-	err := psql.Mydb.Where("is_del = ?", false).Where("asset_id = ?", Asset.ID).Find(&Recipe).Error
+	//	err := psql.Mydb.Where("is_del = ?", false).Where("asset_id = ?", Asset.ID).Find(&Recipe).Error
+	err := psql.Mydb.Where("is_del = ?", false).Find(&Recipe).Error
 	if err != nil {
 		return nil, err
 	}
