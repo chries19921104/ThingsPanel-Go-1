@@ -128,10 +128,10 @@ func (pot *RecipeController) Add() {
 
 	id := uuid.GetUuid()
 	Recipe := models.Recipe{
-		Id:               id,
-		BottomPotId:      addRecipeValidate.BottomPotId,
-		BottomPot:        addRecipeValidate.BottomPot,
-		PotTypeId:        addRecipeValidate.PotTypeId,
+		Id:          id,
+		BottomPotId: addRecipeValidate.BottomPotId,
+		BottomPot:   addRecipeValidate.BottomPot,
+		PotTypeId:   addRecipeValidate.PotTypeId,
 		//Materials:        strings.Join(addRecipeValidate.Materials, ","),
 		//Taste:            strings.Join(addRecipeValidate.Tastes, ","),
 		BottomProperties: addRecipeValidate.BottomProperties,
@@ -387,7 +387,7 @@ func (pot *RecipeController) SendToHDL() {
 		}
 		return
 	}
-	SendToMQTTValidator.AssetId = "10000"
+	//SendToMQTTValidator.AssetId = "10000"
 	Recipe := services.RecipeService{}
 	list, err := Recipe.GetSendToMQTTData(SendToMQTTValidator.AssetId)
 	if err != nil {
