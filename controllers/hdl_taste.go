@@ -42,34 +42,19 @@ func (c *HdlTasteController) List() {
 }
 
 // 编辑
-func (HdlTasteController *HdlTasteController) Edit() {
-	HdlTasteValidate := valid.EditHdlTasteValidate{}
-	err := json.Unmarshal(HdlTasteController.Ctx.Input.RequestBody, &HdlTasteValidate)
-	if err != nil {
-		fmt.Println("参数解析失败", err.Error())
-	}
-	v := validation.Validation{}
-	status, _ := v.Valid(HdlTasteValidate)
-	if !status {
-		for _, err := range v.Errors {
-			// 获取字段别称
-			alias := gvalid.GetAlias(HdlTasteValidate, err.Field)
-			message := strings.Replace(err.Message, err.Field, alias, 1)
-			utils.SuccessWithMessage(1000, message, (*context2.Context)(HdlTasteController.Ctx))
-			break
-		}
+func (c *HdlTasteController) Edit() {
+	reqData := valid.EditHdlTasteValidate{}
+	if err := valid.ParseAndValidate(&c.Ctx.Input.RequestBody, &reqData); err != nil {
+		utils.SuccessWithMessage(1000, err.Error(), (*context2.Context)(c.Ctx))
 		return
 	}
-	if HdlTasteValidate.Id == "" {
-		utils.SuccessWithMessage(1000, "id不能为空", (*context2.Context)(HdlTasteController.Ctx))
-	}
 	var HdlTasteService services.HdlTasteService
-	isSucess := HdlTasteService.EditHdlTaste(HdlTasteValidate)
-	if isSucess {
-		d := HdlTasteService.GetHdlTasteDetail(HdlTasteValidate.Id)
-		utils.SuccessWithDetailed(200, "success", d, map[string]string{}, (*context2.Context)(HdlTasteController.Ctx))
+	err := HdlTasteService.EditHdlTaste(reqData)
+	if err == nil {
+		d := HdlTasteService.GetHdlTasteDetail(reqData.Id)
+		utils.SuccessWithDetailed(200, "success", d, map[string]string{}, (*context2.Context)(c.Ctx))
 	} else {
-		utils.SuccessWithMessage(400, "编辑失败", (*context2.Context)(HdlTasteController.Ctx))
+		utils.SuccessWithMessage(400, err.Error(), (*context2.Context)(c.Ctx))
 	}
 }
 

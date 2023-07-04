@@ -3,15 +3,15 @@ package valid
 import "ThingsPanel-Go/models"
 
 type AddHdlTasteValidate struct {
-	Name    string `json:"name,omitempty" alias:"口味名称" valid:"Required"`        // 口味名称
-	TasteId string `json:"taste_id,omitempty" alias:"pos口味id" valid:"Required"` // pos口味id
+	Name    string `json:"name,omitempty" alias:"口味名称" valid:"Required;MaxSize(500)"`       // 口味名称
+	TasteId string `json:"taste_id,omitempty" alias:"pos口味id" valid:"Required;MaxSize(50)"` // pos口味id
 	Remark  string `json:"remark,omitempty" alias:"备注" valid:"MaxSize(500)"`
 }
 type EditHdlTasteValidate struct {
-	Id      string `json:"id" alias:"ID" valid:"Required;MaxSize(36)"` // ID
-	Name    string `json:"name,omitempty" alias:"口味名称"`                // 口味名称
-	TasteId string `json:"taste_id,omitempty" alias:"pos口味id"`         // pos口味id
-	Remark  string `json:"remark,omitempty" gorm:"size:255"`
+	Id      string `json:"id" alias:"ID" valid:"Required;MaxSize(36)"`             // ID
+	Name    string `json:"name,omitempty" alias:"口味名称" valid:"MaxSize(50)"`        // 口味名称
+	TasteId string `json:"taste_id,omitempty" alias:"pos口味id" valid:"MaxSize(50)"` // pos口味id
+	Remark  string `json:"remark,omitempty" alias:"备注" valid:"MaxSize(500)"`
 }
 
 type HdlTastePaginationValidate struct {

@@ -72,13 +72,30 @@ func (*HdlMaterialsService) AddHdlMaterials(hdl_materials valid.AddHdlMaterialsV
 }
 
 // 修改数据
-func (*HdlMaterialsService) EditHdlMaterials(hdlMaterials valid.EditHdlMaterialsValidate) bool {
-	result := psql.Mydb.Model(&models.HdlMaterials{}).Where("id = ?", hdlMaterials.Id).Updates(&hdlMaterials)
+func (*HdlMaterialsService) EditHdlMaterials(hdlMaterials valid.EditHdlMaterialsValidate) error {
+	// 验证id是否存在
+	var hdl_materials models.HdlMaterials
+	result := psql.Mydb.First(&hdl_materials, "id = ?", hdlMaterials.Id)
 	if result.Error != nil {
 		logs.Error(result.Error.Error())
-		return false
+		return result.Error
 	}
-	return true
+	// 将需要修改的数据组合到结构体中
+	hdl_materials = models.HdlMaterials{
+		Name:      hdlMaterials.Name,
+		Dosage:    hdlMaterials.Dosage,
+		Unit:      hdlMaterials.Unit,
+		WaterLine: hdlMaterials.WaterLine,
+		Station:   hdlMaterials.Station,
+		Resource:  hdlMaterials.Resource,
+		Remark:    hdlMaterials.Remark,
+	}
+	result = psql.Mydb.Model(&models.HdlMaterials{}).Where("id = ?", hdlMaterials.Id).Updates(&hdlMaterials)
+	if result.Error != nil {
+		logs.Error(result.Error.Error())
+		return result.Error
+	}
+	return nil
 }
 
 // 删除数据

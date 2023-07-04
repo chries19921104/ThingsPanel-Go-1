@@ -66,13 +66,27 @@ func (*HdlTasteService) AddHdlTaste(hdl_materials valid.AddHdlTasteValidate) (mo
 }
 
 // 修改数据
-func (*HdlTasteService) EditHdlTaste(HdlTaste valid.EditHdlTasteValidate) bool {
-	result := psql.Mydb.Model(&models.HdlTaste{}).Where("id = ?", HdlTaste.Id).Updates(&HdlTaste)
+func (*HdlTasteService) EditHdlTaste(HdlTaste valid.EditHdlTasteValidate) error {
+	// 验证id是否存在
+	var HdlTasteModel models.HdlTaste
+	result := psql.Mydb.First(&HdlTasteModel, "id = ?", HdlTaste.Id)
 	if result.Error != nil {
 		logs.Error(result.Error.Error())
-		return false
+		return result.Error
 	}
-	return true
+	// 将需要修改的数据组合到结构体中
+	HdlTasteModel = models.HdlTaste{
+		Name:       HdlTaste.Name,
+		TasteId:    HdlTaste.TasteId,
+		UpdateTime: time.Now().Unix(),
+		Remark:     HdlTaste.Remark,
+	}
+	result = psql.Mydb.Model(&models.HdlTaste{}).Where("id = ?", HdlTaste.Id).Updates(&HdlTasteModel)
+	if result.Error != nil {
+		logs.Error(result.Error.Error())
+		return result.Error
+	}
+	return nil
 }
 
 // 删除数据

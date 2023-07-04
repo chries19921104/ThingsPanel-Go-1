@@ -42,34 +42,19 @@ func (c *HdlMaterialsController) List() {
 }
 
 // 编辑
-func (HdlMaterialsController *HdlMaterialsController) Edit() {
-	HdlMaterialsValidate := valid.EditHdlMaterialsValidate{}
-	err := json.Unmarshal(HdlMaterialsController.Ctx.Input.RequestBody, &HdlMaterialsValidate)
-	if err != nil {
-		fmt.Println("参数解析失败", err.Error())
-	}
-	v := validation.Validation{}
-	status, _ := v.Valid(HdlMaterialsValidate)
-	if !status {
-		for _, err := range v.Errors {
-			// 获取字段别称
-			alias := gvalid.GetAlias(HdlMaterialsValidate, err.Field)
-			message := strings.Replace(err.Message, err.Field, alias, 1)
-			utils.SuccessWithMessage(1000, message, (*context2.Context)(HdlMaterialsController.Ctx))
-			break
-		}
+func (c *HdlMaterialsController) Edit() {
+	reqData := valid.EditHdlMaterialsValidate{}
+	if err := valid.ParseAndValidate(&c.Ctx.Input.RequestBody, &reqData); err != nil {
+		utils.SuccessWithMessage(1000, err.Error(), (*context2.Context)(c.Ctx))
 		return
 	}
-	if HdlMaterialsValidate.Id == "" {
-		utils.SuccessWithMessage(1000, "id不能为空", (*context2.Context)(HdlMaterialsController.Ctx))
-	}
 	var HdlMaterialsService services.HdlMaterialsService
-	isSucess := HdlMaterialsService.EditHdlMaterials(HdlMaterialsValidate)
-	if isSucess {
-		d := HdlMaterialsService.GetHdlMaterialsDetail(HdlMaterialsValidate.Id)
-		utils.SuccessWithDetailed(200, "success", d, map[string]string{}, (*context2.Context)(HdlMaterialsController.Ctx))
+	err := HdlMaterialsService.EditHdlMaterials(reqData)
+	if err == nil {
+		d := HdlMaterialsService.GetHdlMaterialsDetail(reqData.Id)
+		utils.SuccessWithDetailed(200, "success", d, map[string]string{}, (*context2.Context)(c.Ctx))
 	} else {
-		utils.SuccessWithMessage(400, "编辑失败", (*context2.Context)(HdlMaterialsController.Ctx))
+		utils.SuccessWithMessage(400, err.Error(), (*context2.Context)(c.Ctx))
 	}
 }
 
