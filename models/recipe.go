@@ -30,7 +30,6 @@ type RecipeValue struct {
 	Materials        string       `gorm:"column:materials"`
 	MaterialArr      []*Materials `gorm:"-"`
 	Taste            string       `gorm:"column:taste"`
-	TasteMaterials   string       `gorm:"column:taste_materials"`
 	TasteArr         []*Taste     `gorm:"-"`
 	BottomProperties string       `gorm:"column:bottom_properties"`
 	SoupStandard     int          `gorm:"column:soup_standard"`
