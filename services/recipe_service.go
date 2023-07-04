@@ -89,7 +89,7 @@ func (*RecipeService) EditRecipe(pot valid.EditRecipeValidator, list1 []models.M
 	err := psql.Mydb.Transaction(func(tx *gorm.DB) error {
 
 		err := tx.Exec("UPDATE recipe SET bottom_pot_id = $1,"+
-			"bottom_pot= $2,pot_type_id= $3,bottom_properties = $4,"+
+			"bottom_pot= $2,pot_type_id= $3,bottom_properties = $4"+
 			" WHERE id = $5",
 			pot.BottomPotId, pot.BottomPot, pot.PotTypeId, pot.BottomProperties, pot.Id).Error
 		if err != nil {
