@@ -127,3 +127,5 @@ COMMENT ON COLUMN public.hdl_add_soup_data.soup_end_time IS '加汤结束时间'
 COMMENT ON COLUMN public.hdl_add_soup_data.feeding_start_time IS '加料开始时间';
 COMMENT ON COLUMN public.hdl_add_soup_data.feeding_end_time IS '加料结束时间';
 COMMENT ON COLUMN public.hdl_add_soup_data.turning_pot_end_time IS '转锅结束时间';
+
+ALTER TABLE public.hdl_materials ADD create_at int8 NULL;

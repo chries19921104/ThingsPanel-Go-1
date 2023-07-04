@@ -1,6 +1,6 @@
 package models
 
-type HdlMaterals struct {
+type HdlMaterials struct {
 	Id        string `json:"id" gorm:"primaryKey"`               // ID
 	Name      string `json:"name,omitempty" gorm:"size:500"`     // 物料名称
 	Dosage    int64  `json:"dosage,omitempty"`                   // 用量
@@ -12,6 +12,6 @@ type HdlMaterals struct {
 	Remark    string `json:"remark,omitempty" gorm:"size:255"`
 }
 
-func (HdlMaterals) TableName() string {
-	return "hdl_materals"
+func (HdlMaterials) TableName() string {
+	return "hdl_materials"
 }

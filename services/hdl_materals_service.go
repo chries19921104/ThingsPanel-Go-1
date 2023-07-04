@@ -11,7 +11,7 @@ import (
 	"gorm.io/gorm"
 )
 
-type HdlMateralsService struct {
+type HdlMaterialsService struct {
 	//可搜索字段
 	SearchField []string
 	//可作为条件的字段
@@ -20,19 +20,19 @@ type HdlMateralsService struct {
 	TimeField []string
 }
 
-func (*HdlMateralsService) GetHdlMateralsDetail(hdl_materals_id string) []models.HdlMaterals {
-	var hdl_materals []models.HdlMaterals
-	psql.Mydb.First(&hdl_materals, "id = ?", hdl_materals_id)
-	return hdl_materals
+func (*HdlMaterialsService) GetHdlMaterialsDetail(hdl_materials_id string) []models.HdlMaterials {
+	var hdl_materials []models.HdlMaterials
+	psql.Mydb.First(&hdl_materials, "id = ?", hdl_materials_id)
+	return hdl_materials
 }
 
 // 获取列表
-func (*HdlMateralsService) GetHdlMateralsList(PaginationValidate valid.HdlMateralsPaginationValidate) (bool, []models.HdlMaterals, int64) {
-	var HdlMateralss []models.HdlMaterals
+func (*HdlMaterialsService) GetHdlMaterialsList(PaginationValidate valid.HdlMaterialsPaginationValidate) (bool, []models.HdlMaterials, int64) {
+	var HdlMaterialss []models.HdlMaterials
 	offset := (PaginationValidate.CurrentPage - 1) * PaginationValidate.PerPage
-	db := psql.Mydb.Model(&models.HdlMaterals{})
+	db := psql.Mydb.Model(&models.HdlMaterials{})
 	if PaginationValidate.Name != "" {
-		db.Where("name = ?", PaginationValidate.Name)
+		db.Where("name like ?", "%"+PaginationValidate.Name+"%")
 	}
 	if PaginationValidate.Id != "" {
 		db.Where("id = ?", PaginationValidate.Id)
@@ -42,48 +42,48 @@ func (*HdlMateralsService) GetHdlMateralsList(PaginationValidate valid.HdlMatera
 	}
 	var count int64
 	db.Count(&count)
-	result := db.Limit(PaginationValidate.PerPage).Offset(offset).Order("created_at desc").Find(&HdlMateralss)
+	result := db.Limit(PaginationValidate.PerPage).Offset(offset).Order("name asc").Find(&HdlMaterialss)
 	if result.Error != nil {
 		logs.Error(result.Error, gorm.ErrRecordNotFound)
-		return false, HdlMateralss, 0
+		return false, HdlMaterialss, 0
 	}
-	return true, HdlMateralss, count
+	return true, HdlMaterialss, count
 }
 
 // 新增数据
-func (*HdlMateralsService) AddHdlMaterals(hdl_materals valid.AddHdlMateralsValidate) (models.HdlMaterals, error) {
-	var hdlMaterals models.HdlMaterals = models.HdlMaterals{
+func (*HdlMaterialsService) AddHdlMaterials(hdl_materials valid.AddHdlMaterialsValidate) (models.HdlMaterials, error) {
+	var hdlMaterials models.HdlMaterials = models.HdlMaterials{
 		Id:        uuid.GetUuid(),
-		Name:      hdl_materals.Name,
-		Dosage:    hdl_materals.Dosage,
-		Unit:      hdl_materals.Unit,
-		WaterLine: hdl_materals.WaterLine,
-		Station:   hdl_materals.Station,
-		Resource:  hdl_materals.Resource,
+		Name:      hdl_materials.Name,
+		Dosage:    hdl_materials.Dosage,
+		Unit:      hdl_materials.Unit,
+		WaterLine: hdl_materials.WaterLine,
+		Station:   hdl_materials.Station,
+		Resource:  hdl_materials.Resource,
 		CreateAt:  time.Now().Unix(),
-		Remark:    hdl_materals.Remark,
+		Remark:    hdl_materials.Remark,
 	}
-	result := psql.Mydb.Create(&hdlMaterals)
+	result := psql.Mydb.Create(&hdlMaterials)
 	if result.Error != nil {
 		logs.Error(result.Error, gorm.ErrRecordNotFound)
-		return hdlMaterals, result.Error
+		return hdlMaterials, result.Error
 	}
-	return hdlMaterals, nil
+	return hdlMaterials, nil
 }
 
 // 修改数据
-func (*HdlMateralsService) EditHdlMaterals(hdlMaterals valid.EditHdlMateralsValidate) bool {
-	result := psql.Mydb.Model(&models.HdlMaterals{}).Where("id = ?", hdlMaterals.Id).Updates(&hdlMaterals)
+func (*HdlMaterialsService) EditHdlMaterials(hdlMaterials valid.EditHdlMaterialsValidate) bool {
+	result := psql.Mydb.Model(&models.HdlMaterials{}).Where("id = ?", hdlMaterials.Id).Updates(&hdlMaterials)
 	if result.Error != nil {
-		logs.Error(result.Error, gorm.ErrRecordNotFound)
+		logs.Error(result.Error.Error())
 		return false
 	}
 	return true
 }
 
 // 删除数据
-func (*HdlMateralsService) DeleteHdlMaterals(hdlMaterals models.HdlMaterals) error {
-	result := psql.Mydb.Delete(&hdlMaterals)
+func (*HdlMaterialsService) DeleteHdlMaterials(hdlMaterials models.HdlMaterials) error {
+	result := psql.Mydb.Delete(&hdlMaterials)
 	if result.Error != nil {
 		logs.Error(result.Error, gorm.ErrRecordNotFound)
 		return result.Error

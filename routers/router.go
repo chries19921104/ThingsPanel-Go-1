@@ -423,6 +423,13 @@ func init() {
 		web.NSRouter("/notification/detail", &controllers.TpNotification{}, "*:Detail"),
 		web.NSRouter("/notification/delete", &controllers.TpNotification{}, "*:Delete"),
 		web.NSRouter("/notification/switch", &controllers.TpNotification{}, "*:Switch"),
+
+		// 海底捞
+		// 物料
+		web.NSRouter("/v1/material/list", &controllers.HdlMaterialsController{}, "*:List"),
+		web.NSRouter("/v1/material/add", &controllers.HdlMaterialsController{}, "*:Add"),
+		web.NSRouter("/v1/material/edit", &controllers.HdlMaterialsController{}, "*:Edit"),
+		web.NSRouter("/v1/material/delete", &controllers.HdlMaterialsController{}, "*:Delete"),
 	)
 
 	// 图表推送数据
