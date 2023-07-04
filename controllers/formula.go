@@ -69,8 +69,14 @@ func (pot *RecipeController) Index() {
 
 	tasteList, err := tasteService.GetTasteList(recipeIdArr)
 	if err != nil {
-		response.SuccessWithMessage(1000, "查询失败", (*context2.Context)(pot.Ctx))
+		response.SuccessWithMessage(1000, "查询失败", pot.Ctx)
 		return
+	}
+	var potTypeService services.PotTypeService
+	_, potType, _ := potTypeService.GetPotTypeList(valid.TpProductPaginationValidate{})
+	potTypeMap := make(map[string]int)
+	for _, value := range potType {
+		potTypeMap[value.Id] = value.SoupStandard
 	}
 
 	for key, value := range d {
@@ -82,6 +88,7 @@ func (pot *RecipeController) Index() {
 		d[key].TasteMaterialArr = tasteMaterialList[value.Id]
 		d[key].Materials = strings.ReplaceAll(d[key].Materials, ",", "\n")
 		d[key].Taste = strings.ReplaceAll(d[key].Taste, ",", "\n")
+		d[key].SoupStandard = potTypeMap[value.PotTypeId]
 	}
 
 	dd := valid.RspRecipePaginationValidate{
@@ -128,14 +135,11 @@ func (pot *RecipeController) Add() {
 
 	id := uuid.GetUuid()
 	Recipe := models.Recipe{
-		Id:          id,
-		BottomPotId: addRecipeValidate.BottomPotId,
-		BottomPot:   addRecipeValidate.BottomPot,
-		PotTypeId:   addRecipeValidate.PotTypeId,
-		//Materials:        strings.Join(addRecipeValidate.Materials, ","),
-		//Taste:            strings.Join(addRecipeValidate.Tastes, ","),
+		Id:               id,
+		BottomPotId:      addRecipeValidate.BottomPotId,
+		BottomPot:        addRecipeValidate.BottomPot,
+		PotTypeId:        addRecipeValidate.PotTypeId,
 		BottomProperties: addRecipeValidate.BottomProperties,
-		SoupStandard:     addRecipeValidate.SoupStandard,
 		CreateAt:         time.Now().Unix(),
 		AssetId:          AssetId,
 		TasteMaterials:   strings.Join(addRecipeValidate.TasteMaterials, ","),

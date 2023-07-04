@@ -41,7 +41,7 @@ func (*RecipeService) GetRecipeList(PaginationValidate valid.RecipePaginationVal
 	if PaginationValidate.Id != "" {
 		db = db.Where("recipe.id = ?", PaginationValidate.Id)
 	}
-	db = db.Select("recipe.id,recipe.bottom_pot_id,recipe.bottom_pot,recipe.pot_type_id,recipe.taste_materials,recipe.bottom_properties,recipe.soup_standard,pot_type.name").Joins("left join pot_type on recipe.pot_type_id = pot_type.pot_type_id").Where("recipe.is_del", false)
+	db = db.Select("recipe.id,recipe.bottom_pot_id,recipe.bottom_pot,recipe.pot_type_id,recipe.taste_materials,recipe.bottom_properties,pot_type.name").Joins("left join pot_type on recipe.pot_type_id = pot_type.pot_type_id").Where("recipe.is_del", false)
 
 	var count int64
 	db.Count(&count)
@@ -96,8 +96,8 @@ func (*RecipeService) EditRecipe(pot valid.EditRecipeValidator, list1 []models.M
 
 		err := tx.Exec("UPDATE recipe SET bottom_pot_id = $1,"+
 			"bottom_pot= $2,pot_type_id= $3,bottom_properties = $4,"+
-			"soup_standard = $5 ,taste_materials = $6 WHERE id = $7",
-			pot.BottomPotId, pot.BottomPot, pot.PotTypeId, pot.BottomProperties, pot.SoupStandard, taste, pot.Id).Error
+			"taste_materials = $5 WHERE id = $6",
+			pot.BottomPotId, pot.BottomPot, pot.PotTypeId, pot.BottomProperties, taste, pot.Id).Error
 		if err != nil {
 			return err
 		}
