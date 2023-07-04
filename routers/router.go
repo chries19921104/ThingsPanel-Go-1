@@ -430,6 +430,11 @@ func init() {
 		web.NSRouter("/v1/material/add", &controllers.HdlMaterialsController{}, "*:Add"),
 		web.NSRouter("/v1/material/edit", &controllers.HdlMaterialsController{}, "*:Edit"),
 		web.NSRouter("/v1/material/delete", &controllers.HdlMaterialsController{}, "*:Delete"),
+		// 口味
+		web.NSRouter("/v1/taste/list", &controllers.HdlTasteController{}, "*:List"),
+		web.NSRouter("/v1/taste/add", &controllers.HdlTasteController{}, "*:Add"),
+		web.NSRouter("/v1/taste/edit", &controllers.HdlTasteController{}, "*:Edit"),
+		web.NSRouter("/v1/taste/delete", &controllers.HdlTasteController{}, "*:Delete"),
 	)
 
 	// 图表推送数据
