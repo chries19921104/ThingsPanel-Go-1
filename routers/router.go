@@ -435,6 +435,11 @@ func init() {
 		web.NSRouter("/v1/taste/add", &controllers.HdlTasteController{}, "*:Add"),
 		web.NSRouter("/v1/taste/edit", &controllers.HdlTasteController{}, "*:Edit"),
 		web.NSRouter("/v1/taste/delete", &controllers.HdlTasteController{}, "*:Delete"),
+		// 锅型
+		web.NSRouter("/v1/pot/list", &controllers.HdlPotTypeController{}, "*:List"),
+		web.NSRouter("/v1/pot/add", &controllers.HdlPotTypeController{}, "*:Add"),
+		web.NSRouter("/v1/pot/edit", &controllers.HdlPotTypeController{}, "*:Edit"),
+		web.NSRouter("/v1/pot/delete", &controllers.HdlPotTypeController{}, "*:Delete"),
 	)
 
 	// 图表推送数据
