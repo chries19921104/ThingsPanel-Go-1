@@ -73,7 +73,7 @@ func (pot *RecipeController) Index() {
 		return
 	}
 	var potTypeService services.PotTypeService
-	_, potType, _ := potTypeService.GetPotTypeList(valid.TpProductPaginationValidate{})
+	_, potType, _ := potTypeService.GetPotTypeList(valid.TpProductPaginationValidate{PerPage: 99, CurrentPage: 1})
 	potTypeMap := make(map[string]int)
 	for _, value := range potType {
 		potTypeMap[value.Id] = value.SoupStandard
