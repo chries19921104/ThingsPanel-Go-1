@@ -142,7 +142,6 @@ func (pot *RecipeController) Add() {
 		BottomProperties: addRecipeValidate.BottomProperties,
 		CreateAt:         time.Now().Unix(),
 		AssetId:          AssetId,
-		TasteMaterials:   strings.Join(addRecipeValidate.TasteMaterials, ","),
 	}
 
 	MaterialArr := make([]models.Materials, 0)

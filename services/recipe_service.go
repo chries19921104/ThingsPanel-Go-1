@@ -85,19 +85,13 @@ func (*RecipeService) AddRecipe(pot models.Recipe, list1 []models.Materials, lis
 
 // 修改数据
 func (*RecipeService) EditRecipe(pot valid.EditRecipeValidator, list1 []models.Materials, list2 []*models.Taste, list3 []string, list4 []string) error {
-	taste := ""
-	//if len(pot.Tastes) == 0 {
-	//	taste = ""
-	//} else {
-	//	taste = strings.Join(pot.Tastes, ",")
-	//}
 
 	err := psql.Mydb.Transaction(func(tx *gorm.DB) error {
 
 		err := tx.Exec("UPDATE recipe SET bottom_pot_id = $1,"+
 			"bottom_pot= $2,pot_type_id= $3,bottom_properties = $4,"+
-			"taste_materials = $5 WHERE id = $6",
-			pot.BottomPotId, pot.BottomPot, pot.PotTypeId, pot.BottomProperties, taste, pot.Id).Error
+			" WHERE id = $6",
+			pot.BottomPotId, pot.BottomPot, pot.PotTypeId, pot.BottomProperties, pot.Id).Error
 		if err != nil {
 			return err
 		}

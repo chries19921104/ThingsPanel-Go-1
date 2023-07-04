@@ -18,7 +18,6 @@ type Recipe struct {
 	AssetId          string    `gorm:"column:asset_id"`
 	MaterialIdList   []string  `gorm:"-"`
 	TasteIdList      []string  `gorm:"-"`
-	TasteMaterials   string    `gorm:"taste_materials"`
 }
 
 type RecipeValue struct {
