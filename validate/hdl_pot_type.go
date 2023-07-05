@@ -7,6 +7,7 @@ type AddHdlPotTypeValidate struct {
 	Image        string `json:"image,omitempty" alias:"图片" valid:"Required;MaxSize(500)"`  // 图片
 	SoupStandard int64  `json:"soup_standard,omitempty" alias:"水位线标准" valid:"Required"`    //水位线标准
 	Remark       string `json:"remark,omitempty" alias:"备注" valid:"MaxSize(500)"`
+	PotTypeId    string `json:"pot_type_id,omitempty" alias:"锅型id" valid:"MaxSize(50)"` // 锅型id
 }
 type EditHdlPotTypeValidate struct {
 	Id           string `json:"id" alias:"ID" valid:"Required;MaxSize(36)"`                // ID
@@ -14,6 +15,7 @@ type EditHdlPotTypeValidate struct {
 	Image        string `json:"image,omitempty" alias:"图片" valid:"Required;MaxSize(500)"`  // 图片
 	SoupStandard int64  `json:"soup_standard,omitempty" alias:"水位线标准" valid:"Required"`    //水位线标准
 	Remark       string `json:"remark" alias:"备注" valid:"MaxSize(500)"`
+	PotTypeId    string `json:"pot_type_id,omitempty" alias:"锅型id" valid:"MaxSize(50)"` // 锅型id
 }
 
 type HdlPotTypePaginationValidate struct {

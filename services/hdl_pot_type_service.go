@@ -57,6 +57,7 @@ func (*HdlPotTypeService) AddHdlPotType(pot valid.AddHdlPotTypeValidate) (models
 		CreateAt:     time.Now().Unix(),
 		UpdateAt:     time.Now().Unix(),
 		Remark:       pot.Remark,
+		PotTypeId:    pot.PotTypeId,
 	}
 	result := psql.Mydb.Create(&HdlPotType)
 	if result.Error != nil {
@@ -82,6 +83,7 @@ func (*HdlPotTypeService) EditHdlPotType(HdlPotType valid.EditHdlPotTypeValidate
 		UpdateAt:     time.Now().Unix(),
 		SoupStandard: HdlPotType.SoupStandard,
 		Remark:       HdlPotType.Remark,
+		PotTypeId:    HdlPotType.PotTypeId,
 	}
 	result = psql.Mydb.Model(&models.HdlPotType{}).Where("id = ?", HdlPotType.Id).Updates(&HdlPotTypeModel)
 	if result.Error != nil {
