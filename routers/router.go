@@ -440,6 +440,12 @@ func init() {
 		web.NSRouter("/v1/pot/add", &controllers.HdlPotTypeController{}, "*:Add"),
 		web.NSRouter("/v1/pot/edit", &controllers.HdlPotTypeController{}, "*:Edit"),
 		web.NSRouter("/v1/pot/delete", &controllers.HdlPotTypeController{}, "*:Delete"),
+		// 配方
+		web.NSRouter("/v1/recipe/list", &controllers.HdlRecipeController{}, "*:List"),
+		web.NSRouter("/v1/recipe/add", &controllers.HdlRecipeController{}, "*:Add"),
+		web.NSRouter("/v1/recipe/entire/add", &controllers.HdlRecipeController{}, "*:EntireAdd"),
+		web.NSRouter("/v1/recipe/edit", &controllers.HdlRecipeController{}, "*:Edit"),
+		web.NSRouter("/v1/recipe/delete", &controllers.HdlRecipeController{}, "*:Delete"),
 	)
 
 	// 图表推送数据
