@@ -95,6 +95,7 @@ func (HdlPotTypeController *HdlPotTypeController) Delete() {
 	}
 	if HdlPotTypeIdValidate.Id == "" {
 		utils.SuccessWithMessage(1000, "id不能为空", (*context2.Context)(HdlPotTypeController.Ctx))
+		return
 	}
 	var HdlPotTypeService services.HdlPotTypeService
 	HdlPotType := models.HdlPotType{
