@@ -4,14 +4,14 @@ import "ThingsPanel-Go/models"
 
 type AddHdlPotTypeValidate struct {
 	Name         string `json:"name,omitempty" alias:"锅型名称" valid:"Required;MaxSize(500)"` // 锅型名称
-	Image        string `json:"image,omitempty" alias:"图片" valid:"Required;MaxSize(50)"`   // 图片
+	Image        string `json:"image,omitempty" alias:"图片" valid:"Required;MaxSize(500)"`  // 图片
 	SoupStandard int64  `json:"soup_standard,omitempty" alias:"水位线标准" valid:"Required"`    //水位线标准
 	Remark       string `json:"remark,omitempty" alias:"备注" valid:"MaxSize(500)"`
 }
 type EditHdlPotTypeValidate struct {
 	Id           string `json:"id" alias:"ID" valid:"Required;MaxSize(36)"`                // ID
 	Name         string `json:"name,omitempty" alias:"锅型名称" valid:"Required;MaxSize(500)"` // 锅型名称
-	Image        string `json:"image,omitempty" alias:"图片" valid:"Required;MaxSize(50)"`   // 图片
+	Image        string `json:"image,omitempty" alias:"图片" valid:"Required;MaxSize(500)"`  // 图片
 	SoupStandard int64  `json:"soup_standard,omitempty" alias:"水位线标准" valid:"Required"`    //水位线标准
 	Remark       string `json:"remark" alias:"备注" valid:"MaxSize(500)"`
 }
