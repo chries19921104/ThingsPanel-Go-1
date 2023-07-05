@@ -20,10 +20,10 @@ type HdlTasteService struct {
 	TimeField []string
 }
 
-func (*HdlTasteService) GetHdlTasteDetail(hdl_materials_id string) []models.HdlTaste {
-	var hdl_materials []models.HdlTaste
-	psql.Mydb.First(&hdl_materials, "id = ?", hdl_materials_id)
-	return hdl_materials
+func (*HdlTasteService) GetHdlTasteDetail(hdl_taste_id string) []models.HdlTaste {
+	var hdl_taste []models.HdlTaste
+	psql.Mydb.First(&hdl_taste, "id = ?", hdl_taste_id)
+	return hdl_taste
 }
 
 // 获取列表
@@ -48,14 +48,14 @@ func (*HdlTasteService) GetHdlTasteList(PaginationValidate valid.HdlTastePaginat
 }
 
 // 新增数据
-func (*HdlTasteService) AddHdlTaste(hdl_materials valid.AddHdlTasteValidate) (models.HdlTaste, error) {
+func (*HdlTasteService) AddHdlTaste(hdl_taste valid.AddHdlTasteValidate) (models.HdlTaste, error) {
 	var HdlTaste models.HdlTaste = models.HdlTaste{
 		Id:         uuid.GetUuid(),
-		Name:       hdl_materials.Name,
-		TasteId:    hdl_materials.TasteId,
+		Name:       hdl_taste.Name,
+		TasteId:    hdl_taste.TasteId,
 		CreateAt:   time.Now().Unix(),
 		UpdateTime: time.Now().Unix(),
-		Remark:     hdl_materials.Remark,
+		Remark:     hdl_taste.Remark,
 	}
 	result := psql.Mydb.Create(&HdlTaste)
 	if result.Error != nil {
