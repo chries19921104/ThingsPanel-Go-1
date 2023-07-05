@@ -87,6 +87,28 @@ func (c *HdlRecipeController) Edit() {
 }
 
 // 新增整个配方
+func (c *HdlRecipeController) EntireEdit() {
+	reqData := valid.AddEntireHdlRecipeValidate{}
+	if err := valid.ParseAndValidate(&c.Ctx.Input.RequestBody, &reqData); err != nil {
+		utils.SuccessWithMessage(1000, err.Error(), (*context2.Context)(c.Ctx))
+		return
+	}
+	// 获取用户租户id
+	tenantId, ok := c.Ctx.Input.GetData("tenant_id").(string)
+	if !ok {
+		utils.SuccessWithMessage(400, "代码逻辑错误,未获取到租户id", (*context2.Context)(c.Ctx))
+		return
+	}
+	var HdlRecipeService services.HdlRecipeService
+	d, rsp_err := HdlRecipeService.AddHdlRecipeAndMateralsAndTaste(reqData, tenantId)
+	if rsp_err == nil {
+		utils.SuccessWithDetailed(200, "success", d, map[string]string{}, (*context2.Context)(c.Ctx))
+	} else {
+		utils.SuccessWithMessage(400, rsp_err.Error(), (*context2.Context)(c.Ctx))
+	}
+}
+
+// 新增整个配方
 func (c *HdlRecipeController) EntireAdd() {
 	reqData := valid.AddEntireHdlRecipeValidate{}
 	if err := valid.ParseAndValidate(&c.Ctx.Input.RequestBody, &reqData); err != nil {
@@ -146,14 +168,42 @@ func (HdlRecipeController *HdlRecipeController) Delete() {
 	if HdlRecipeIdValidate.Id == "" {
 		utils.SuccessWithMessage(1000, "id不能为空", (*context2.Context)(HdlRecipeController.Ctx))
 	}
+	// 获取用户租户id
+	tenantId, ok := HdlRecipeController.Ctx.Input.GetData("tenant_id").(string)
+	if !ok {
+		utils.SuccessWithMessage(400, "代码逻辑错误,未获取到租户id", (*context2.Context)(HdlRecipeController.Ctx))
+		return
+	}
 	var HdlRecipeService services.HdlRecipeService
 	HdlRecipe := models.HdlRecipe{
 		Id: HdlRecipeIdValidate.Id,
 	}
-	req_err := HdlRecipeService.DeleteHdlRecipe(HdlRecipe)
+	req_err := HdlRecipeService.DeleteHdlRecipe(HdlRecipe, tenantId)
 	if req_err == nil {
 		utils.SuccessWithMessage(200, "success", (*context2.Context)(HdlRecipeController.Ctx))
 	} else {
 		utils.SuccessWithMessage(400, "删除失败", (*context2.Context)(HdlRecipeController.Ctx))
+	}
+}
+
+// 下发配置
+func (c *HdlRecipeController) SendConfig() {
+	reqData := valid.SendHdlRecipeValidate{}
+	if err := valid.ParseAndValidate(&c.Ctx.Input.RequestBody, &reqData); err != nil {
+		utils.SuccessWithMessage(1000, err.Error(), (*context2.Context)(c.Ctx))
+		return
+	}
+	// 获取用户租户id
+	tenantId, ok := c.Ctx.Input.GetData("tenant_id").(string)
+	if !ok {
+		utils.SuccessWithMessage(400, "代码逻辑错误,未获取到租户id", (*context2.Context)(c.Ctx))
+		return
+	}
+	var HdlRecipeService services.HdlRecipeService
+	rsp_err := HdlRecipeService.SendHdlRecipe(reqData, tenantId)
+	if rsp_err == nil {
+		utils.SuccessWithMessage(200, "success", (*context2.Context)(c.Ctx))
+	} else {
+		utils.SuccessWithMessage(400, rsp_err.Error(), (*context2.Context)(c.Ctx))
 	}
 }

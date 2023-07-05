@@ -10,6 +10,7 @@ type AddHdlRecipeValidate struct {
 	Remark           string `json:"remark,omitempty" alias:"备注" valid:"MaxSize(500)"`
 }
 type AddEntireHdlRecipeValidate struct {
+	Id               string                    `json:"id" alias:"ID" valid:"MaxSize(36)"`                            // ID
 	BottomPotId      string                    `json:"bottom_pot_id,omitempty" alias:"hdl锅底id" valid:"MaxSize(500)"` // 锅底id
 	BottomPot        string                    `json:"bottom_pot,omitempty" alias:"锅底名称" valid:"MaxSize(500)"`       // 锅底名称
 	BottomProperties string                    `json:"bottom_properties,omitempty" alias:"锅底属性" valid:"MaxSize(50)"` // 锅底属性 辣 不辣
@@ -47,4 +48,9 @@ type RspHdlEntireRecipePaginationValidate struct {
 }
 type HdlRecipeIdValidate struct {
 	Id string `json:"id"  gorm:"primaryKey" valid:"Required;MaxSize(36)"`
+}
+
+// 下发配方
+type SendHdlRecipeValidate struct {
+	DeviceId string `json:"device_id"  valid:"Required;MaxSize(36)"`
 }
