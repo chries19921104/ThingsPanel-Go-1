@@ -129,3 +129,7 @@ COMMENT ON COLUMN public.hdl_add_soup_data.feeding_end_time IS '加料结束时�
 COMMENT ON COLUMN public.hdl_add_soup_data.turning_pot_end_time IS '转锅结束时间';
 
 ALTER TABLE public.hdl_materials ADD create_at int8 NULL;
+ALTER TABLE public.hdl_r_recipe_materals RENAME TO hdl_r_recipe_materials;
+ALTER TABLE public.hdl_r_taste_materals RENAME TO hdl_r_taste_materials;
+ALTER TABLE public.hdl_r_recipe_materials RENAME COLUMN hdl_materals_id TO hdl_materials_id;
+ALTER TABLE public.hdl_r_taste_materials RENAME COLUMN hdl_materals_id TO hdl_materials_id;
