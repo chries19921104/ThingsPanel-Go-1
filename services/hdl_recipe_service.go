@@ -47,6 +47,56 @@ func (*HdlRecipeService) GetHdlRecipeList(PaginationValidate valid.HdlRecipePagi
 	return true, HdlRecipes, count
 }
 
+// 获取列表
+func (*HdlRecipeService) GetHdlRecipeEntireList(PaginationValidate valid.HdlRecipePaginationValidate, tenantId string) (bool, []map[string]interface{}, int64) {
+	var hdlRecipesMap []map[string]interface{}
+	offset := (PaginationValidate.CurrentPage - 1) * PaginationValidate.PerPage
+	db := psql.Mydb.Model(&models.HdlRecipe{})
+	db.Where("tenant_id = ?", tenantId)
+	if PaginationValidate.BottomPot != "" {
+		db.Where("bottom_pot like ?", "%"+PaginationValidate.BottomPot+"%")
+	}
+	if PaginationValidate.Id != "" {
+		db.Where("id = ?", PaginationValidate.Id)
+	}
+	var count int64
+	db.Count(&count)
+	result := db.Limit(PaginationValidate.PerPage).Offset(offset).Order("bottom_pot asc").Find(&hdlRecipesMap)
+	if result.Error != nil {
+		logs.Error(result.Error.Error())
+		return false, hdlRecipesMap, 0
+	}
+	// 查询配方的物料列表
+	for k, v := range hdlRecipesMap {
+		var hdlRecipeMaterials []models.HdlMaterials
+		result := psql.Mydb.Model(&models.HdlMaterials{}).Joins("left join hdl_r_recipe_materials on hdl_r_recipe_materials.hdl_materials_id = hdl_materials.id").Where("hdl_r_recipe_materials.hdl_recipe_id = ?", v["id"]).Find(&hdlRecipeMaterials)
+		if result.Error != nil {
+			logs.Error(result.Error, gorm.ErrRecordNotFound)
+			return false, hdlRecipesMap, 0
+		}
+		hdlRecipesMap[k]["materials_list"] = hdlRecipeMaterials
+		// 查询配方的口味列表
+		var hdlRecipeTasteMap []map[string]interface{}
+		result = psql.Mydb.Model(&models.HdlTaste{}).Joins("left join hdl_r_recipe_taste on hdl_r_recipe_taste.hdl_taste_id = hdl_taste.id").Where("hdl_r_recipe_taste.hdl_recipe_id = ?", v["id"]).Find(&hdlRecipeTasteMap)
+		if result.Error != nil {
+			logs.Error(result.Error, gorm.ErrRecordNotFound)
+			return false, hdlRecipesMap, 0
+		}
+		for k1, v1 := range hdlRecipeTasteMap {
+			// 查询口味的物料列表
+			var hdlTasteMaterials []models.HdlMaterials
+			result := psql.Mydb.Model(&models.HdlMaterials{}).Joins("left join hdl_r_taste_materials on hdl_r_taste_materials.hdl_materials_id = hdl_materials.id").Where("hdl_r_taste_materials.hdl_taste_id = ?", v1["id"]).Find(&hdlTasteMaterials)
+			if result.Error != nil {
+				logs.Error(result.Error, gorm.ErrRecordNotFound)
+				return false, hdlRecipesMap, 0
+			}
+			hdlRecipeTasteMap[k1]["materials_list"] = hdlTasteMaterials
+		}
+		hdlRecipesMap[k]["taste_list"] = hdlRecipeTasteMap
+	}
+	return true, hdlRecipesMap, count
+}
+
 // 新增数据
 func (*HdlRecipeService) AddHdlRecipe(hdl_recipe valid.AddHdlRecipeValidate) (models.HdlRecipe, error) {
 	var HdlRecipe models.HdlRecipe = models.HdlRecipe{
@@ -68,7 +118,7 @@ func (*HdlRecipeService) AddHdlRecipe(hdl_recipe valid.AddHdlRecipeValidate) (mo
 }
 
 // 新增配方整体数据，包括物料和口味
-func (*HdlRecipeService) AddHdlRecipeAndMateralsAndTaste(hdl_recipe valid.AddEntireHdlRecipeValidate) (models.HdlRecipe, error) {
+func (*HdlRecipeService) AddHdlRecipeAndMateralsAndTaste(hdl_recipe valid.AddEntireHdlRecipeValidate, tenantId string) (models.HdlRecipe, error) {
 	// 创建事务
 	tx := psql.Mydb.Begin()
 	// 创建配方
@@ -81,6 +131,7 @@ func (*HdlRecipeService) AddHdlRecipeAndMateralsAndTaste(hdl_recipe valid.AddEnt
 		CreateAt:         time.Now().Unix(),
 		UpdateAt:         time.Now().Unix(),
 		Remark:           hdl_recipe.Remark,
+		TenantId:         tenantId,
 	}
 	result := tx.Create(&HdlRecipe)
 	if result.Error != nil {

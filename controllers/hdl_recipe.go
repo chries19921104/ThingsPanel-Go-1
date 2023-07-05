@@ -41,6 +41,34 @@ func (c *HdlRecipeController) List() {
 	utils.SuccessWithDetailed(200, "success", dd, map[string]string{}, (*context2.Context)(c.Ctx))
 }
 
+// 列表查询包括物料、口味列表
+func (c *HdlRecipeController) EntireList() {
+	reqData := valid.HdlRecipePaginationValidate{}
+	if err := valid.ParseAndValidate(&c.Ctx.Input.RequestBody, &reqData); err != nil {
+		utils.SuccessWithMessage(1000, err.Error(), (*context2.Context)(c.Ctx))
+		return
+	}
+	// 获取用户租户id
+	tenantId, ok := c.Ctx.Input.GetData("tenant_id").(string)
+	if !ok {
+		utils.SuccessWithMessage(400, "代码逻辑错误,未获取到租户id", (*context2.Context)(c.Ctx))
+		return
+	}
+	var HdlRecipeService services.HdlRecipeService
+	isSuccess, d, t := HdlRecipeService.GetHdlRecipeEntireList(reqData, tenantId)
+	if !isSuccess {
+		utils.SuccessWithMessage(1000, "查询失败", (*context2.Context)(c.Ctx))
+		return
+	}
+	dd := valid.RspHdlEntireRecipePaginationValidate{
+		CurrentPage: reqData.CurrentPage,
+		Data:        d,
+		Total:       t,
+		PerPage:     reqData.PerPage,
+	}
+	utils.SuccessWithDetailed(200, "success", dd, map[string]string{}, (*context2.Context)(c.Ctx))
+}
+
 // 编辑
 func (c *HdlRecipeController) Edit() {
 	reqData := valid.EditHdlRecipeValidate{}
@@ -65,8 +93,14 @@ func (c *HdlRecipeController) EntireAdd() {
 		utils.SuccessWithMessage(1000, err.Error(), (*context2.Context)(c.Ctx))
 		return
 	}
+	// 获取用户租户id
+	tenantId, ok := c.Ctx.Input.GetData("tenant_id").(string)
+	if !ok {
+		utils.SuccessWithMessage(400, "代码逻辑错误,未获取到租户id", (*context2.Context)(c.Ctx))
+		return
+	}
 	var HdlRecipeService services.HdlRecipeService
-	d, rsp_err := HdlRecipeService.AddHdlRecipeAndMateralsAndTaste(reqData)
+	d, rsp_err := HdlRecipeService.AddHdlRecipeAndMateralsAndTaste(reqData, tenantId)
 	if rsp_err == nil {
 		utils.SuccessWithDetailed(200, "success", d, map[string]string{}, (*context2.Context)(c.Ctx))
 	} else {
