@@ -139,3 +139,7 @@ ALTER TABLE public.hdl_r_recipe_taste ADD CONSTRAINT hdl_r_recipe_taste_fk FOREI
 ALTER TABLE public.hdl_r_recipe_taste ADD CONSTRAINT hdl_r_recipe_taste_fk_1 FOREIGN KEY (hdl_taste_id) REFERENCES public.hdl_taste(id) ON DELETE RESTRICT;
 ALTER TABLE public.hdl_r_taste_materials ADD CONSTRAINT hdl_r_taste_materials_fk FOREIGN KEY (hdl_taste_id) REFERENCES public.hdl_taste(id) ON DELETE CASCADE;
 ALTER TABLE public.hdl_r_taste_materials ADD CONSTRAINT hdl_r_taste_materials_fk_1 FOREIGN KEY (hdl_materials_id) REFERENCES public.hdl_materials(id) ON DELETE RESTRICT;
+
+INSERT INTO public.tp_function (id, function_name, menu_id, "path", "name", component, title, icon, "type", function_code, parent_id, sort, tenant_id, sys_flag) VALUES('3be98efe-706b-bf27-2c84-bff4cb9d2661', '', NULL, '/recipe/index', 'RecipeList', '/pages/recipe/index.vue', '配方管理', '', '1', '', '0', 100, NULL, NULL);
+INSERT INTO public.tp_function (id, function_name, menu_id, "path", "name", component, title, icon, "type", function_code, parent_id, sort, tenant_id, sys_flag) VALUES('1dadabe8-659f-4a6c-a9fb-4314579cb3ab', '', NULL, '/pot/index', 'PotIndex', '/pages/pot/index.vue', '锅型管理', '', '1', '', '0', 99, NULL, NULL);
+INSERT INTO public.tp_function (id, function_name, menu_id, "path", "name", component, title, icon, "type", function_code, parent_id, sort, tenant_id, sys_flag) VALUES('a27e0e68-5263-51a2-5cc4-5ea6130e1aef', '', NULL, '/soup/index', 'SoupDataManage', '/pages/soup/index.vue', '加汤数据管理', '', '1', '', '0', 0, NULL, NULL);
