@@ -21,7 +21,7 @@ type EditHdlPotTypeValidate struct {
 type HdlPotTypePaginationValidate struct {
 	CurrentPage int    `json:"current_page"  alias:"当前页" valid:"Required;Min(1)"`
 	PerPage     int    `json:"per_page"  alias:"每页页数" valid:"Required;Max(10000)"`
-	Name        string `json:"name,omitempty" alias:"锅型名称" valid:"Required;MaxSize(500)"`
+	Name        string `json:"name,omitempty" alias:"锅型名称" valid:"MaxSize(500)"`
 	Id          string `json:"id,omitempty" alias:"Id" valid:"MaxSize(36)"`
 }
 type RspHdlPotTypePaginationValidate struct {
