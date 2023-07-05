@@ -13,5 +13,5 @@ type HdlRecipe struct {
 }
 
 func (HdlRecipe) TableName() string {
-	return "hdl_taste"
+	return "hdl_recipe"
 }

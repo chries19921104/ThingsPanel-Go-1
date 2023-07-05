@@ -179,7 +179,7 @@ func (*HdlRecipeService) AddHdlRecipeAndMateralsAndTaste(hdl_recipe valid.AddEnt
 						return HdlRecipe, result.Error
 					}
 					// 创建口味物料关联
-					var hdlTasteMaterials models.HdlRTasteMateriais = models.HdlRTasteMateriais{
+					var hdlTasteMaterials models.HdlRTasteMaterials = models.HdlRTasteMaterials{
 						HdlTasteId:     hdlTaste.Id,
 						HdlMaterialsId: hdlTasteMaterials.Id,
 					}
@@ -244,7 +244,7 @@ func (*HdlRecipeService) AddHdlRecipeAndMateralsAndTaste(hdl_recipe valid.AddEnt
 						return HdlRecipe, result.Error
 					}
 					// 创建口味物料关联
-					var hdlTasteMaterials models.HdlRTasteMateriais = models.HdlRTasteMateriais{
+					var hdlTasteMaterials models.HdlRTasteMaterials = models.HdlRTasteMaterials{
 						HdlTasteId:     hdlTaste.Id,
 						HdlMaterialsId: hdlTasteMaterials.Id,
 					}
@@ -285,7 +285,7 @@ func (*HdlRecipeService) ClearHdlTasteAndMaterials() error {
 	}
 	for _, v := range hdlTaste {
 		// 清理口味物料关系
-		result := tx.Model(&models.HdlRTasteMateriais{}).Where("hdl_taste_id = ?", v.Id).Delete(&models.HdlRTasteMateriais{})
+		result := tx.Model(&models.HdlRTasteMaterials{}).Where("hdl_taste_id = ?", v.Id).Delete(&models.HdlRTasteMaterials{})
 		if result.Error != nil {
 			logs.Error(result.Error.Error())
 			tx.Rollback()
@@ -317,7 +317,7 @@ func (*HdlRecipeService) ClearHdlTasteAndMaterials() error {
 		}
 	}
 	// 清理未被使用的物料，即清理口味物料关系表中不存在且物料的Resource值是taste的物料
-	result = tx.Model(&models.HdlMaterials{}).Where("id not in (select hdl_materials_id from hdl_r_taste_materiais) and resource = 'taste'").Find(&hdlMaterials)
+	result = tx.Model(&models.HdlMaterials{}).Where("id not in (select hdl_materials_id from hdl_r_taste_materials) and resource = 'taste'").Find(&hdlMaterials)
 	if result.Error != nil {
 		logs.Error(result.Error.Error())
 		tx.Rollback()
