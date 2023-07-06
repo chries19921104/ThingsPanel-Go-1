@@ -55,12 +55,12 @@ func (*HdlRecipeService) GetHdlRecipeEntireList(PaginationValidate valid.HdlReci
 	var hdlRecipesMap []map[string]interface{}
 	offset := (PaginationValidate.CurrentPage - 1) * PaginationValidate.PerPage
 	db := psql.Mydb.Model(&models.HdlRecipe{})
-	db.Where("tenant_id = ?", tenantId)
+	db.Where("hdl_recipe.tenant_id = ?", tenantId)
 	if PaginationValidate.BottomPot != "" {
-		db.Where("bottom_pot like ?", "%"+PaginationValidate.BottomPot+"%")
+		db.Where("hdl_recipe.bottom_pot like ?", "%"+PaginationValidate.BottomPot+"%")
 	}
 	if PaginationValidate.Id != "" {
-		db.Where("id = ?", PaginationValidate.Id)
+		db.Where("hdl_recipe.id = ?", PaginationValidate.Id)
 	}
 	var count int64
 	db.Count(&count)
