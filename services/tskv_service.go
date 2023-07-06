@@ -1222,28 +1222,64 @@ func (*TSKVService) HdlOrderMsgProc(body []byte, topic string) bool {
 
 	// }
 
-	orderTimeParse, _ := time.ParseInLocation("2006-01-02 15:04:05", data.OrderTime, time.Local)
-	SoupAddingStartTimeParse, _ := time.ParseInLocation("2006-01-02 15:04:05", data.SoupAddingStartTime, time.Local)
-	SoupAddingFinishTimeParse, _ := time.ParseInLocation("2006-01-02 15:04:05", data.SoupAddingFinishTime, time.Local)
-	FeedingStartTimeParse, _ := time.ParseInLocation("2006-01-02 15:04:05", data.IngredientAddingStartTime, time.Local)
-	FeedingEndTimeParse, _ := time.ParseInLocation("2006-01-02 15:04:05", data.IngredientAddingFinishTime, time.Local)
-	PotSwitchingFinishTimeParse, _ := time.ParseInLocation("2006-01-02 15:04:05", data.PotSwitchingFinishTime, time.Local)
+	// orderTimeParse, _ := time.ParseInLocation("2006-01-02 15:04:05", data.OrderTime, time.Local)
+	// SoupAddingStartTimeParse, _ := time.ParseInLocation("2006-01-02 15:04:05", data.SoupAddingStartTime, time.Local)
+	// SoupAddingFinishTimeParse, _ := time.ParseInLocation("2006-01-02 15:04:05", data.SoupAddingFinishTime, time.Local)
+	// FeedingStartTimeParse, _ := time.ParseInLocation("2006-01-02 15:04:05", data.IngredientAddingStartTime, time.Local)
+	// FeedingEndTimeParse, _ := time.ParseInLocation("2006-01-02 15:04:05", data.IngredientAddingFinishTime, time.Local)
+	// PotSwitchingFinishTimeParse, _ := time.ParseInLocation("2006-01-02 15:04:05", data.PotSwitchingFinishTime, time.Local)
 
-	dataModel := &models.AddSoupData{
-		Id:               uuid.GetUuid(),
-		ShopName:         data.StoreID,
-		OrderSn:          data.OrderID,
-		BottomId:         data.PotID,
-		BottomPot:        data.PotID,
-		TableNumber:      data.TableNumber,
-		OrderTime:        orderTimeParse,
-		SoupStartTime:    SoupAddingStartTimeParse,
-		SoupEndTime:      SoupAddingFinishTimeParse,
-		FeedingStartTime: FeedingStartTimeParse,
-		FeedingEndTime:   FeedingEndTimeParse,
-		TurningPotEnd:    PotSwitchingFinishTimeParse,
-		ShopId:           data.StoreID,
-		CreateAt:         time.Now().Unix(),
+	// 根据店铺id（users中的remark）去users表查找name并且authority = SYS_ADMIN
+	var hdlTenant models.Users
+	err = psql.Mydb.Where("remark = ? AND authority = ?", data.StoreID, "TENANT_ADMIN").First(&hdlTenant).Error
+	if err != nil {
+		logs.Error(err)
+	}
+	// 获取锅底id列表，potId用|分割，最后一个是锅型id，前面都是锅底id
+	var potTypeId string
+	if strings.Count(data.PotID, "|") > 0 {
+		potTypeId = strings.Split(data.PotID, "|")[len(strings.Split(data.PotID, "|"))-1]
+	} else {
+		potTypeId = data.PotID
+	}
+
+	// 判断data.PotID不为空并且至少有一个|，否则不处理
+	// 定义锅底名称
+	var bottomName string
+	if data.PotID != "" && strings.Count(data.PotID, "|") > 0 {
+
+		var bottomIdList []string = strings.Split(data.PotID, "|")[0 : len(strings.Split(data.PotID, "|"))-1]
+		// 遍历bottomIdList，根据锅底id到配方表中查找锅底名称用|分割拼接bottomName
+		for _, bottomId := range bottomIdList {
+			var hdlRecipe models.HdlRecipe
+			err = psql.Mydb.Where("bottom_pot_id = ? and tenant_id = ?", bottomId, hdlTenant.TenantID).First(&hdlRecipe).Error
+			if err != nil {
+				logs.Error(err)
+			}
+			bottomName = bottomName + hdlRecipe.BottomPot + "|"
+		}
+		// 去掉最后一个|
+		bottomName = bottomName[0 : len(bottomName)-1]
+	}
+
+	//	potId用|分割，最后一个是锅型id，前面都是锅底id
+	dataModel := &models.HdlAddSoupData{
+		Id:                uuid.GetUuid(),
+		ShopId:            data.StoreID,
+		ShopName:          hdlTenant.Name,
+		OrderSn:           data.OrderID,
+		BottomId:          strings.Split(data.PotID, "|")[len(strings.Split(data.PotID, "|"))-1],
+		PotTypeId:         potTypeId,
+		BottomPot:         bottomName, //锅底名称（|分割）
+		TableNumber:       data.TableNumber,
+		OrderTime:         data.OrderTime,
+		SoupStartTime:     data.SoupAddingStartTime,
+		SoupEndTime:       data.SoupAddingFinishTime,
+		FeedingStartTime:  data.IngredientAddingStartTime,
+		FeedingEndTime:    data.IngredientAddingFinishTime,
+		TurningPotEndTime: data.PotSwitchingFinishTime,
+		CreateAt:          time.Now().Unix(),
+		CreationTime:      data.CreationTime,
 	}
 
 	err = psql.Mydb.Create(dataModel).Error
@@ -1251,17 +1287,5 @@ func (*TSKVService) HdlOrderMsgProc(body []byte, topic string) bool {
 		logs.Error(err)
 		return false
 	}
-	//dec_str, err := base64.StdEncoding.DecodeString()
-	//if err != nil {
-	//	logs.Error(err)
-	//	return false
-	//}
-	//if values, ok := payload.Values.(map[string]interface{}); ok {
-	//	logs.Info()
-	//}
-	//logs.Info(dec_str)
-
-	// 原发送数据为payload，到这里就变成{"token":"xxx","values":payload},payload为[]byte
-	// 参考上下两个接收数据方法
 	return true
 }

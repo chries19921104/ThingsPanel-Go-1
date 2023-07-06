@@ -5,10 +5,10 @@ import (
 	"ThingsPanel-Go/models"
 	"ThingsPanel-Go/utils"
 	valid "ThingsPanel-Go/validate"
+	"errors"
 	"fmt"
 
 	"github.com/beego/beego/v2/core/logs"
-	"gorm.io/gorm"
 )
 
 type SoupDataService struct {
@@ -21,10 +21,55 @@ type SoupDataService struct {
 }
 
 // 获取列表
-func (*SoupDataService) GetList(PaginationValidate valid.SoupDataPaginationValidate) (bool, []models.AddSoupDataValue, int64) {
-	var SoupData []models.AddSoupDataValue
+func (*SoupDataService) GetList(PaginationValidate valid.SoupDataPaginationValidate, tenantId string) ([]map[string]interface{}, int64, error) {
+	// 根据租户id获取租户管理员的备注，租户管理员在user表存贮
+	var tenantAdmin models.Users
+	if err := psql.Mydb.Model(&models.Users{}).Where("tenant_id = ? and authority = 'TENANT_ADMIN'", tenantId).First(&tenantAdmin).Error; err != nil {
+		return nil, 0, err
+	}
+	// 店铺名称是租户管理员的名称，店铺id是租户管理员的备注
+	var SoupData []models.HdlAddSoupData
 	offset := (PaginationValidate.CurrentPage - 1) * PaginationValidate.PerPage
-	db := psql.Mydb.Model(&models.AddSoupData{})
+	db := psql.Mydb.Model(&models.HdlAddSoupData{})
+	// 根据店铺id查询店铺订单数量
+	if tenantAdmin.Remark != "" {
+		db = db.Where("shop_id = ?", tenantAdmin.Remark)
+	} else {
+		return nil, 0, errors.New("店铺id为空，请先设置店铺id")
+	}
+	// 定义店铺数量
+	var count int64
+	// 根据店铺id查询店铺订单数量
+	db.Count(&count)
+	// 根据店铺id查询店铺订单
+	result := db.Limit(PaginationValidate.PerPage).Offset(offset).Order("creation_time desc").Find(&SoupData)
+	if result.Error != nil {
+		logs.Error(result.Error)
+		return nil, 0, result.Error
+	}
+	//定义一个map列表
+	var SoupDataMapList []map[string]interface{}
+	for _, v := range SoupData {
+		// 定义一个map
+		SoupDataMap := make(map[string]interface{})
+
+		SoupDataMap["order_sn"] = v.OrderSn                       //订单号
+		SoupDataMap["table_number"] = v.TableNumber               //桌号
+		SoupDataMap["shop_id"] = v.ShopId                         //店铺id
+		SoupDataMap["bottom_id"] = v.BottomId                     //锅底id
+		SoupDataMap["bottom_pot"] = v.BottomPot                   //锅底名称
+		SoupDataMap["shop_name"] = v.ShopName                     //店铺名称
+		SoupDataMap["order_time"] = v.OrderTime                   //下单时间
+		SoupDataMap["feeding_end_time"] = v.FeedingEndTime        //投料结束时间
+		SoupDataMap["soup_start_time"] = v.SoupStartTime          //加汤开始时间
+		SoupDataMap["turning_pot_end_time"] = v.TurningPotEndTime //翻锅结束时间
+		SoupDataMap["soup_end_time"] = v.SoupEndTime              //加汤结束时间
+		//SoupDataMap["feeding_start_time"] = v.FeedingStartTime//投料开始时间
+		SoupDataMap["creation_time"] = v.CreationTime //订单创建时间
+		SoupDataMapList = append(SoupDataMapList, SoupDataMap)
+
+	}
+	return SoupDataMapList, count, nil
 	// if PaginationValidate.ShopName != "" {
 	// 	asset := &models.Asset{}
 	// 	if err := psql.Mydb.Model(&models.Asset{}).Where("name like ?", "%"+PaginationValidate.ShopName+"%").First(asset).Error; err != nil {
@@ -33,15 +78,15 @@ func (*SoupDataService) GetList(PaginationValidate valid.SoupDataPaginationValid
 	// 	db = db.Where("add_soup_data.shop_id = ?", asset.ID)
 	// }
 
-	var count int64
-	db.Count(&count)
-	result := db.Model(new(models.AddSoupData)).Select("add_soup_data.bottom_pot,add_soup_data.order_sn,add_soup_data.table_number,add_soup_data.order_time,add_soup_data.soup_start_time,add_soup_data.soup_end_time,add_soup_data.feeding_start_time,add_soup_data.feeding_end_time,add_soup_data.turning_pot_end_time,add_soup_data.turning_pot_end_time,add_soup_data.name order by create_at desc").Limit(PaginationValidate.PerPage).Offset(offset).Find(&SoupData)
+	// var count int64
+	// db.Count(&count)
+	// result := db.Model(new(models.AddSoupData)).Select("add_soup_data.bottom_pot,add_soup_data.order_sn,add_soup_data.table_number,add_soup_data.order_time,add_soup_data.soup_start_time,add_soup_data.soup_end_time,add_soup_data.feeding_start_time,add_soup_data.feeding_end_time,add_soup_data.turning_pot_end_time,add_soup_data.turning_pot_end_time,add_soup_data.name order by create_at desc").Limit(PaginationValidate.PerPage).Offset(offset).Find(&SoupData)
 	//result := db.Model(new(models.AddSoupData)).Select("add_soup_data.bottom_pot,add_soup_data.order_sn,add_soup_data.table_number,add_soup_data.order_time,add_soup_data.soup_start_time,add_soup_data.soup_end_time,add_soup_data.feeding_start_time,add_soup_data.feeding_end_time,add_soup_data.turning_pot_end_time,add_soup_data.turning_pot_end_time,asset.name").Joins("left join recipe on add_soup_data.bottom_id = recipe.bottom_pot_id").Joins("left join asset on add_soup_data.shop_id = asset.id").Limit(PaginationValidate.PerPage).Offset(offset).Find(&SoupData)
-	if result.Error != nil {
-		logs.Error(result.Error, gorm.ErrRecordNotFound)
-		return false, SoupData, 0
-	}
-	return true, SoupData, count
+	// if result.Error != nil {
+	// 	logs.Error(result.Error, gorm.ErrRecordNotFound)
+	// 	return false, SoupData, 0
+	// }
+	//return true, SoupData, count
 }
 
 // 分页查询数据

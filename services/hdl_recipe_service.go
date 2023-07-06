@@ -64,6 +64,10 @@ func (*HdlRecipeService) GetHdlRecipeEntireList(PaginationValidate valid.HdlReci
 	}
 	var count int64
 	db.Count(&count)
+	// 通过hdl_pot_type_id连接查询
+	db = db.Joins("left join hdl_pot_type on hdl_pot_type.id = hdl_recipe.hdl_pot_type_id")
+	// 设置查询字段
+	db = db.Select("hdl_recipe.*,hdl_pot_type.name as pot_type_name,hdl_pot_type.pot_type_id as pot_type_id")
 	result := db.Limit(PaginationValidate.PerPage).Offset(offset).Order("bottom_pot asc").Find(&hdlRecipesMap)
 	if result.Error != nil {
 		logs.Error(result.Error.Error())

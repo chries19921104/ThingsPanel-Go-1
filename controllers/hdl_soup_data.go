@@ -8,14 +8,15 @@ import (
 	valid "ThingsPanel-Go/validate"
 	"encoding/json"
 	"fmt"
+	"os"
+	"strconv"
+	"strings"
+
 	"github.com/beego/beego/v2/core/validation"
 	beego "github.com/beego/beego/v2/server/web"
 	context2 "github.com/beego/beego/v2/server/web/context"
 	"github.com/mintance/go-uniqid"
 	"github.com/xuri/excelize/v2"
-	"os"
-	"strconv"
-	"strings"
 )
 
 type SoupDataController struct {
@@ -40,32 +41,21 @@ func (soup *SoupDataController) Index() {
 		}
 		return
 	}
+	// 获取用户租户id
+	tenantId, ok := soup.Ctx.Input.GetData("tenant_id").(string)
+	if !ok {
+		response.SuccessWithMessage(400, "代码逻辑错误,未获取到租户id", (*context2.Context)(soup.Ctx))
+		return
+	}
 	var SoupDataService services.SoupDataService
-	isSuccess, d, t := SoupDataService.GetList(PaginationValidate)
-
-	if !isSuccess {
+	d, t, err := SoupDataService.GetList(PaginationValidate, tenantId)
+	if err != nil {
 		response.SuccessWithMessage(1000, "查询失败", (*context2.Context)(soup.Ctx))
 		return
 	}
-	returnAddSoupData := make([]models.ReturnAddSoupDataValue, 0)
-	for _, v := range d {
-		returnAddSoupData = append(returnAddSoupData, models.ReturnAddSoupDataValue{
-			Id:               v.Id,
-			ShopName:         v.ShopName,
-			OrderSn:          v.OrderSn,
-			BottomPot:        v.BottomPot,
-			TableNumber:      v.TableNumber,
-			OrderTime:        v.OrderTime.Unix()*1000,
-			SoupStartTime:    v.SoupStartTime.Unix()*1000,
-			SoupEndTime:      v.SoupEndTime.Unix()*1000,
-			FeedingStartTime: v.FeedingStartTime.Unix()*1000,
-			FeedingEndTime:   v.FeedingEndTime.Unix()*1000,
-			TurningPotEnd:    v.TurningPotEnd.Unix()*1000,
-		})
-	}
 	dd := valid.RspSoupDataPaginationValidate{
 		CurrentPage: PaginationValidate.CurrentPage,
-		Data:        returnAddSoupData,
+		Data:        d,
 		Total:       t,
 		PerPage:     PaginationValidate.PerPage,
 	}
