@@ -1,7 +1,5 @@
 package valid
 
-import "ThingsPanel-Go/models"
-
 type AddHdlTasteValidate struct {
 	Name    string `json:"name,omitempty" alias:"口味名称" valid:"Required;MaxSize(500)"`       // 口味名称
 	TasteId string `json:"taste_id,omitempty" alias:"pos口味id" valid:"Required;MaxSize(50)"` // pos口味id
@@ -28,10 +26,10 @@ type HdlTastePaginationValidate struct {
 	Id          string `json:"id,omitempty" alias:"Id" valid:"MaxSize(36)"`
 }
 type RspHdlTastePaginationValidate struct {
-	CurrentPage int               `json:"current_page"  alias:"当前页" valid:"Required;Min(1)"`
-	PerPage     int               `json:"per_page"  alias:"每页页数" valid:"Required;Max(10000)"`
-	Data        []models.HdlTaste `json:"data" alias:"返回数据"`
-	Total       int64             `json:"total" alias:"总数" valid:"Max(10000)"`
+	CurrentPage int                      `json:"current_page"  alias:"当前页" valid:"Required;Min(1)"`
+	PerPage     int                      `json:"per_page"  alias:"每页页数" valid:"Required;Max(10000)"`
+	Data        []map[string]interface{} `json:"data" alias:"返回数据"`
+	Total       int64                    `json:"total" alias:"总数" valid:"Max(10000)"`
 }
 
 type HdlTasteIdValidate struct {

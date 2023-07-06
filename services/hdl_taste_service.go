@@ -27,8 +27,8 @@ func (*HdlTasteService) GetHdlTasteDetail(hdl_taste_id string) []models.HdlTaste
 }
 
 // 获取列表
-func (*HdlTasteService) GetHdlTasteList(PaginationValidate valid.HdlTastePaginationValidate) (bool, []models.HdlTaste, int64) {
-	var HdlTastes []models.HdlTaste
+func (*HdlTasteService) GetHdlTasteList(PaginationValidate valid.HdlTastePaginationValidate) ([]map[string]interface{}, int64, error) {
+	var HdlTastesMap []map[string]interface{}
 	offset := (PaginationValidate.CurrentPage - 1) * PaginationValidate.PerPage
 	db := psql.Mydb.Model(&models.HdlTaste{})
 	if PaginationValidate.Name != "" {
@@ -39,12 +39,23 @@ func (*HdlTasteService) GetHdlTasteList(PaginationValidate valid.HdlTastePaginat
 	}
 	var count int64
 	db.Count(&count)
-	result := db.Limit(PaginationValidate.PerPage).Offset(offset).Order("name asc").Find(&HdlTastes)
+	result := db.Limit(PaginationValidate.PerPage).Offset(offset).Order("name asc").Find(&HdlTastesMap)
 	if result.Error != nil {
-		logs.Error(result.Error, gorm.ErrRecordNotFound)
-		return false, HdlTastes, 0
+		logs.Error(result.Error.Error())
+		return HdlTastesMap, 0, result.Error
 	}
-	return true, HdlTastes, count
+	// 遍历数据，根据口味id查询出物料列表，其中口味和物料是多对多的关系，关系表是hdl_r_taste_materials
+	for _, v := range HdlTastesMap {
+		var hdlMaterials []models.HdlMaterials
+		result = psql.Mydb.Model(&models.HdlMaterials{}).Joins("left join hdl_r_taste_materials on hdl_r_taste_materials.hdl_materials_id = hdl_materials.id").Where("hdl_r_taste_materials.hdl_taste_id = ?", v["id"]).Find(&hdlMaterials)
+		if result.Error != nil {
+			logs.Error(result.Error.Error())
+			return HdlTastesMap, 0, result.Error
+		}
+		v["materials_list"] = hdlMaterials
+	}
+
+	return HdlTastesMap, count, nil
 }
 
 // 新增数据

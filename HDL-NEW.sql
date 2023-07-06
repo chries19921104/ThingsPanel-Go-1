@@ -158,3 +158,4 @@ ALTER TABLE public.hdl_add_soup_data RENAME COLUMN pottypeid TO pot_type_id;
 ALTER TABLE public.hdl_add_soup_data RENAME COLUMN "name" TO shop_name;
 ALTER TABLE public.hdl_add_soup_data ADD creation_time varchar(50) NULL;
 COMMENT ON COLUMN public.hdl_add_soup_data.creation_time IS '订单创建时间';
+ALTER TABLE public.hdl_recipe ADD CONSTRAINT hdl_recipe_fk FOREIGN KEY (hdl_pot_type_id) REFERENCES public.hdl_pot_type(id) ON DELETE RESTRICT;

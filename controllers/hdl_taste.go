@@ -27,9 +27,9 @@ func (c *HdlTasteController) List() {
 		return
 	}
 	var HdlTasteService services.HdlTasteService
-	isSuccess, d, t := HdlTasteService.GetHdlTasteList(reqData)
-	if !isSuccess {
-		utils.SuccessWithMessage(1000, "查询失败", (*context2.Context)(c.Ctx))
+	d, t, err := HdlTasteService.GetHdlTasteList(reqData)
+	if err != nil {
+		utils.SuccessWithMessage(1000, err.Error(), (*context2.Context)(c.Ctx))
 		return
 	}
 	dd := valid.RspHdlTastePaginationValidate{
