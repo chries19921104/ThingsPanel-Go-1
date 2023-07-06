@@ -31,6 +31,10 @@ func (*SoupDataService) GetList(PaginationValidate valid.SoupDataPaginationValid
 	var SoupData []models.HdlAddSoupData
 	offset := (PaginationValidate.CurrentPage - 1) * PaginationValidate.PerPage
 	db := psql.Mydb.Model(&models.HdlAddSoupData{})
+	// 如果店铺名称不为空，则根据店铺名称查询店铺id
+	if PaginationValidate.ShopName != "" {
+		db.Where("shop_name like ?", "%"+PaginationValidate.ShopName+"%")
+	}
 	// 根据店铺id查询店铺订单数量
 	if tenantAdmin.Remark != "" {
 		db = db.Where("shop_id = ?", tenantAdmin.Remark)

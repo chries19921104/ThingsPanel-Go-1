@@ -1206,29 +1206,6 @@ func (*TSKVService) HdlOrderMsgProc(body []byte, topic string) bool {
 		return false
 	}
 	logs.Info(data)
-	// 不判断店铺，店铺名称直接存入id
-	// var shop models.Asset
-	// err = psql.Mydb.Where("id = ?", data.StoreID).First(&shop).Error
-	// if err != nil {
-	// 	logs.Error(err)
-	// 	return false
-	// }
-	//不判断 直接存入
-	// var recipe models.Recipe
-	// err = psql.Mydb.Select("bottom_pot").Where("id = ?", data.PotID).First(&recipe).Error
-	// if err != nil {
-	// 	logs.Error(err)
-	// 	return false
-
-	// }
-
-	// orderTimeParse, _ := time.ParseInLocation("2006-01-02 15:04:05", data.OrderTime, time.Local)
-	// SoupAddingStartTimeParse, _ := time.ParseInLocation("2006-01-02 15:04:05", data.SoupAddingStartTime, time.Local)
-	// SoupAddingFinishTimeParse, _ := time.ParseInLocation("2006-01-02 15:04:05", data.SoupAddingFinishTime, time.Local)
-	// FeedingStartTimeParse, _ := time.ParseInLocation("2006-01-02 15:04:05", data.IngredientAddingStartTime, time.Local)
-	// FeedingEndTimeParse, _ := time.ParseInLocation("2006-01-02 15:04:05", data.IngredientAddingFinishTime, time.Local)
-	// PotSwitchingFinishTimeParse, _ := time.ParseInLocation("2006-01-02 15:04:05", data.PotSwitchingFinishTime, time.Local)
-
 	// 根据店铺id（users中的remark）去users表查找name并且authority = SYS_ADMIN
 	var hdlTenant models.Users
 	err = psql.Mydb.Where("remark = ? AND authority = ?", data.StoreID, "TENANT_ADMIN").First(&hdlTenant).Error

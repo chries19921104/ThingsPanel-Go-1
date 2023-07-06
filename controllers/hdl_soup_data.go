@@ -2,7 +2,6 @@ package controllers
 
 import (
 	gvalid "ThingsPanel-Go/initialize/validate"
-	"ThingsPanel-Go/models"
 	"ThingsPanel-Go/services"
 	response "ThingsPanel-Go/utils"
 	valid "ThingsPanel-Go/validate"
@@ -81,6 +80,12 @@ func (soup *SoupDataController) Export() {
 		}
 		return
 	}
+	// 获取用户租户id
+	tenantId, ok := soup.Ctx.Input.GetData("tenant_id").(string)
+	if !ok {
+		response.SuccessWithMessage(400, "代码逻辑错误,未获取到租户id", (*context2.Context)(soup.Ctx))
+		return
+	}
 	var TSKVService services.SoupDataService
 	//每次查10000条
 	num := SoupDataExcelValidate.Limit / 10000
@@ -97,12 +102,16 @@ func (soup *SoupDataController) Export() {
 	excel_file.SetCellValue("Sheet1", "H1", "加料完成时间")
 	excel_file.SetCellValue("Sheet1", "I1", "转锅完成时间")
 	for i := 0; i <= num; i++ {
-		var t []models.AddSoupDataValue
+		var t []map[string]interface{}
 		var c int64
 		if (i+1)*10000 <= SoupDataExcelValidate.Limit {
-			t, c = TSKVService.Paginate(SoupDataExcelValidate.ShopName, (i+1)*10000, i*10000)
+			SoupDataExcelValidate.CurrentPage = i + 1
+			SoupDataExcelValidate.PerPage = 10000
+			t, c, err = TSKVService.GetList(SoupDataExcelValidate, tenantId)
 		} else {
-			t, c = TSKVService.Paginate(SoupDataExcelValidate.ShopName, SoupDataExcelValidate.Limit%10000, i*10000)
+			SoupDataExcelValidate.CurrentPage = i + 1
+			SoupDataExcelValidate.PerPage = SoupDataExcelValidate.Limit % 10000
+			t, c, err = TSKVService.GetList(SoupDataExcelValidate, tenantId)
 		}
 		var i int
 		if c > 0 {
@@ -110,15 +119,15 @@ func (soup *SoupDataController) Export() {
 			for _, tv := range t {
 				i++
 				is := strconv.Itoa(i)
-				excel_file.SetCellValue("Sheet1", "A"+is, tv.ShopName)
-				excel_file.SetCellValue("Sheet1", "B"+is, tv.OrderSn)
-				excel_file.SetCellValue("Sheet1", "C"+is, tv.BottomPot)
-				excel_file.SetCellValue("Sheet1", "D"+is, tv.TableNumber)
-				excel_file.SetCellValue("Sheet1", "E"+is, tv.OrderTime)
-				excel_file.SetCellValue("Sheet1", "F"+is, tv.SoupStartTime)
-				excel_file.SetCellValue("Sheet1", "G"+is, tv.SoupEndTime)
-				excel_file.SetCellValue("Sheet1", "H"+is, tv.FeedingEndTime)
-				excel_file.SetCellValue("Sheet1", "I"+is, tv.TurningPotEnd)
+				excel_file.SetCellValue("Sheet1", "A"+is, tv["shop_name"])
+				excel_file.SetCellValue("Sheet1", "B"+is, tv["order_sn"])
+				excel_file.SetCellValue("Sheet1", "C"+is, tv["bottom_pot"])
+				excel_file.SetCellValue("Sheet1", "D"+is, tv["table_number"])
+				excel_file.SetCellValue("Sheet1", "E"+is, tv["creation_time"])
+				excel_file.SetCellValue("Sheet1", "F"+is, tv["soup_start_time"])
+				excel_file.SetCellValue("Sheet1", "G"+is, tv["soup_end_time"])
+				excel_file.SetCellValue("Sheet1", "H"+is, tv["feeding_end_time"])
+				excel_file.SetCellValue("Sheet1", "I"+is, tv["turning_pot_end_time"])
 			}
 		}
 	}
