@@ -540,12 +540,14 @@ func (*HdlRecipeService) SendHdlRecipe(SendHdlRecipeValidate valid.SendHdlRecipe
 	// 遍历hdlRecipe，通过配方id获取配方物料关系
 	for i, v := range hdlRecipe {
 		// sendRecipeList赋值
-		sendRecipeList[i] = &SendRecipe{
+		var sendRecipe = &SendRecipe{
 			BottomPotId:      v.BottomPotId,
 			BottomPot:        v.BottomPot,
 			PotTypeId:        v.HdlPotTypeId,
 			BottomProperties: v.BottomProperties,
 		}
+		// 加到sendRecipeList中
+		sendRecipeList = append(sendRecipeList, sendRecipe)
 		var hdlRRecipeMaterials []models.HdlRRecipeMaterials
 		result := psql.Mydb.Model(&models.HdlRRecipeMaterials{}).Where("hdl_recipe_id = ?", v.Id).Find(&hdlRRecipeMaterials)
 		if result.Error != nil {
@@ -589,12 +591,14 @@ func (*HdlRecipeService) SendHdlRecipe(SendHdlRecipeValidate valid.SendHdlRecipe
 		return result.Error
 	}
 	// 遍历hdlPotType，给SendPotTypeList赋值
-	for i, v := range hdlPotType {
-		SendPotTypeList[i] = &SendPotType{
+	for _, v := range hdlPotType {
+		var SendPotType = &SendPotType{
 			Name:         v.Name,
 			SoupStandard: int(v.SoupStandard),
 			PotTypeId:    v.Id,
 		}
+		// 加到SendPotTypeList中
+		SendPotTypeList = append(SendPotTypeList, SendPotType)
 	}
 	// 定义物料
 	var SendMaterialsList []*SendMaterials
@@ -648,7 +652,7 @@ func (*HdlRecipeService) SendHdlRecipe(SendHdlRecipeValidate valid.SendHdlRecipe
 	}
 	// 根据deviceId获取token
 	var hdlDevice models.Device
-	result = psql.Mydb.Model(&models.Device{}).Where("device_id = ?", SendHdlRecipeValidate.DeviceId).Find(&hdlDevice)
+	result = psql.Mydb.Model(&models.Device{}).Where("id = ?", SendHdlRecipeValidate.DeviceId).Find(&hdlDevice)
 	if result.Error != nil {
 		logs.Error(result.Error.Error())
 		return result.Error

@@ -148,6 +148,7 @@ func Publish(topic string, qos byte, retained bool, payload interface{}) error {
 
 // 向海底捞发送mqtt消息
 func SendToHDL(payload []byte, token string) (err error) {
+	connect()
 	// 读取配置文件
 	hdlConfig, err := ParseYaml()
 	if err != nil {
