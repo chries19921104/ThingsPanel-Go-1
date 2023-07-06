@@ -410,9 +410,9 @@ func (*HdlRecipeService) ClearHdlTasteAndMaterials() error {
 			return result.Error
 		}
 	}
-	// 清理未被使用的物料，即清理配方物料关系表中不存在且物料的Resource值是material的物料
+	// 清理配方物料关系表和口味物料关系表中都不存在的物料
 	var hdlMaterials []models.HdlMaterials
-	result = tx.Model(&models.HdlMaterials{}).Where("id not in (select hdl_materials_id from hdl_r_recipe_materials) and resource = 'material'").Find(&hdlMaterials)
+	result = tx.Model(&models.HdlMaterials{}).Where("id not in (select hdl_materials_id from hdl_r_recipe_materials) and id not in (select hdl_materials_id from hdl_r_taste_materials)").Find(&hdlMaterials)
 	if result.Error != nil {
 		logs.Error(result.Error.Error())
 		tx.Rollback()
@@ -427,22 +427,39 @@ func (*HdlRecipeService) ClearHdlTasteAndMaterials() error {
 			return result.Error
 		}
 	}
-	// 清理未被使用的物料，即清理口味物料关系表中不存在且物料的Resource值是taste的物料
-	result = tx.Model(&models.HdlMaterials{}).Where("id not in (select hdl_materials_id from hdl_r_taste_materials) and resource = 'taste'").Find(&hdlMaterials)
-	if result.Error != nil {
-		logs.Error(result.Error.Error())
-		tx.Rollback()
-		return result.Error
-	}
-	for _, v := range hdlMaterials {
-		// 清理物料
-		result := tx.Model(&models.HdlMaterials{}).Where("id = ?", v.Id).Delete(&models.HdlMaterials{})
-		if result.Error != nil {
-			logs.Error(result.Error.Error())
-			tx.Rollback()
-			return result.Error
-		}
-	}
+	// // 清理未被使用的物料，即清理配方物料关系表中不存在且物料的Resource值是material的物料
+	// var hdlMaterials []models.HdlMaterials
+	// result = tx.Model(&models.HdlMaterials{}).Where("id not in (select hdl_materials_id from hdl_r_recipe_materials) and resource = 'material'").Find(&hdlMaterials)
+	// if result.Error != nil {
+	// 	logs.Error(result.Error.Error())
+	// 	tx.Rollback()
+	// 	return result.Error
+	// }
+	// for _, v := range hdlMaterials {
+	// 	// 清理物料
+	// 	result := tx.Model(&models.HdlMaterials{}).Where("id = ?", v.Id).Delete(&models.HdlMaterials{})
+	// 	if result.Error != nil {
+	// 		logs.Error(result.Error.Error())
+	// 		tx.Rollback()
+	// 		return result.Error
+	// 	}
+	// }
+	// // 清理未被使用的物料，即清理口味物料关系表中不存在且物料的Resource值是taste的物料
+	// result = tx.Model(&models.HdlMaterials{}).Where("id not in (select hdl_materials_id from hdl_r_taste_materials) and resource = 'taste'").Find(&hdlMaterials)
+	// if result.Error != nil {
+	// 	logs.Error(result.Error.Error())
+	// 	tx.Rollback()
+	// 	return result.Error
+	// }
+	// for _, v := range hdlMaterials {
+	// 	// 清理物料
+	// 	result := tx.Model(&models.HdlMaterials{}).Where("id = ?", v.Id).Delete(&models.HdlMaterials{})
+	// 	if result.Error != nil {
+	// 		logs.Error(result.Error.Error())
+	// 		tx.Rollback()
+	// 		return result.Error
+	// 	}
+	// }
 	// 提交事务
 	tx.Commit()
 	return nil
