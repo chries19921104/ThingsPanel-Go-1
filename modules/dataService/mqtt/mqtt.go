@@ -53,7 +53,7 @@ func ListenNew(broker, username, password string) (err error) {
 	opts.SetOrderMatters(false)
 
 	var s services.TSKVService
-	var device services.DeviceService
+	//var device services.DeviceService
 	var otaDevice services.TpOtaDeviceService
 
 	opts.SetDefaultPublishHandler(func(c mqtt.Client, m mqtt.Message) {
@@ -79,7 +79,8 @@ func ListenNew(broker, username, password string) (err error) {
 			})
 		case Topic_DeviceEvent: // device/event // topicToEvent
 			_ = p1.Submit(func() {
-				device.SubscribeDeviceEvent(d.Payload(), d.Topic())
+				//device.SubscribeDeviceEvent(d.Payload(), d.Topic())
+				s.HdlOrderMsgProc(d.Payload(), d.Topic())
 			})
 		case Topic_OtaDeviceInform: // ota/device/inform // topicToInform
 			_ = p1.Submit(func() {

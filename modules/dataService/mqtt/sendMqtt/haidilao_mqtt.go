@@ -57,19 +57,20 @@ import (
 // 	MaterialIdList []string `json:"MaterialIdList"`
 // }
 
-// type HdlOrder struct {
-// 	StoreID                    string `json:"storeId"`
-// 	OrderID                    string `json:"orderId"`
-// 	PotID                      string `json:"potId"`
-// 	TableNumber                string `json:"tableNumber"`
-// 	OrderTime                  string `json:"orderTime"`
-// 	SoupAddingStartTime        string `json:"soupAddingStartTime"`
-// 	SoupAddingFinishTime       string `json:"soupAddingFinishTime"`
-// 	IngredientAddingStartTime  string `json:"ingredientAddingStartTime"`
-// 	IngredientAddingFinishTime string `json:"ingredientAddingFinishTime"`
-// 	PotSwitchingFinishTime     string `json:"potSwitchingFinishTime"`
-// 	CreationTime               string `json:"creationTime"`
-// }
+type HdlOrder struct {
+	StoreID                    string `json:"storeId"`
+	OrderID                    string `json:"orderId"`
+	PotID                      string `json:"potId"`
+	TableNumber                string `json:"tableNumber"`
+	OrderTime                  string `json:"orderTime"`
+	SoupAddingStartTime        string `json:"soupAddingStartTime"`
+	SoupAddingFinishTime       string `json:"soupAddingFinishTime"`
+	IngredientAddingStartTime  string `json:"ingredientAddingStartTime"`
+	IngredientAddingFinishTime string `json:"ingredientAddingFinishTime"`
+	PotSwitchingFinishTime     string `json:"potSwitchingFinishTime"`
+	CreationTime               string `json:"creationTime"`
+}
+
 // type PotTypeConfig struct {
 // 	SendId  string
 // 	PotType []*PotType
@@ -165,6 +166,7 @@ func SendToHDL(payload []byte, token string) (err error) {
 
 // 向海底捞发送mqtt消息
 func SendTimeToHDL(payload []byte, token string) (err error) {
+	connect()
 	// 读取配置文件
 	hdlConfig, err := ParseYaml()
 	if err != nil {

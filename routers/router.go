@@ -449,6 +449,10 @@ func init() {
 		web.NSRouter("/v1/recipe/entire/edit", &controllers.HdlRecipeController{}, "*:EntireEdit"),
 		web.NSRouter("/v1/recipe/delete", &controllers.HdlRecipeController{}, "*:Delete"),
 		web.NSRouter("/v1/recipe/send/config", &controllers.HdlRecipeController{}, "*:SendConfig"),
+
+		//加汤数据管理
+		web.NSRouter("/v1/soup/data/index", &controllers.SoupDataController{}, "*:Index"),
+		web.NSRouter("/v1/soup/data/export", &controllers.SoupDataController{}, "*:Export"),
 	)
 
 	// 图表推送数据
