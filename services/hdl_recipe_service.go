@@ -50,7 +50,7 @@ func (*HdlRecipeService) GetHdlRecipeList(PaginationValidate valid.HdlRecipePagi
 	return true, HdlRecipes, count
 }
 
-// 获取列表
+// 获取整个列表
 func (*HdlRecipeService) GetHdlRecipeEntireList(PaginationValidate valid.HdlRecipePaginationValidate, tenantId string) (bool, []map[string]interface{}, int64) {
 	var hdlRecipesMap []map[string]interface{}
 	offset := (PaginationValidate.CurrentPage - 1) * PaginationValidate.PerPage
@@ -68,7 +68,7 @@ func (*HdlRecipeService) GetHdlRecipeEntireList(PaginationValidate valid.HdlReci
 	db = db.Joins("left join hdl_pot_type on hdl_pot_type.id = hdl_recipe.hdl_pot_type_id")
 	// 设置查询字段
 	db = db.Select("hdl_recipe.*,hdl_pot_type.name as pot_type_name,hdl_pot_type.pot_type_id as pot_type_id")
-	result := db.Limit(PaginationValidate.PerPage).Offset(offset).Order("bottom_pot asc").Find(&hdlRecipesMap)
+	result := db.Limit(PaginationValidate.PerPage).Offset(offset).Order("update_at desc").Find(&hdlRecipesMap)
 	if result.Error != nil {
 		logs.Error(result.Error.Error())
 		return false, hdlRecipesMap, 0
