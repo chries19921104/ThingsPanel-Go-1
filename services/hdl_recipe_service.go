@@ -141,6 +141,7 @@ func (*HdlRecipeService) AddHdlRecipeAndMateralsAndTaste(hdl_recipe valid.AddEnt
 	}
 	// 判断配方id是否存在
 	if HdlRecipe.Id != "" {
+		// 添加配方id
 		// 存在则更新
 		result := tx.Model(&models.HdlRecipe{}).Where("id = ?", HdlRecipe.Id).Updates(&HdlRecipe)
 		if result.Error != nil {
@@ -179,6 +180,8 @@ func (*HdlRecipeService) AddHdlRecipeAndMateralsAndTaste(hdl_recipe valid.AddEnt
 		}
 		// 判断物料id是否存在
 		if v.Id != "" {
+			// 添加物料id
+			hdlMaterials.Id = v.Id
 			// 存在则更新
 			result := tx.Model(&models.HdlMaterials{}).Where("id = ?", hdlMaterials.Id).Updates(&hdlMaterials)
 			if result.Error != nil {
@@ -226,6 +229,8 @@ func (*HdlRecipeService) AddHdlRecipeAndMateralsAndTaste(hdl_recipe valid.AddEnt
 			Remark:     v.Remark,
 		}
 		if v.Id != "" {
+			// 添加口味id
+			hdlTaste.Id = v.Id
 			// 存在则更新
 			result := tx.Model(&models.HdlTaste{}).Where("id = ?", hdlTaste.Id).Updates(&hdlTaste)
 			if result.Error != nil {
@@ -253,6 +258,8 @@ func (*HdlRecipeService) AddHdlRecipeAndMateralsAndTaste(hdl_recipe valid.AddEnt
 				}
 				// 判断物料id是否存在
 				if v.Id != "" {
+					// 添加物料id
+					hdlTasteMaterials.Id = v.Id
 					// 存在则更新
 					result := tx.Model(&models.HdlMaterials{}).Where("id = ?", hdlTasteMaterials.Id).Updates(&hdlTasteMaterials)
 					if result.Error != nil {
@@ -324,6 +331,8 @@ func (*HdlRecipeService) AddHdlRecipeAndMateralsAndTaste(hdl_recipe valid.AddEnt
 				}
 				// 判断物料id是否存在
 				if v.Id != "" {
+					// 添加物料id
+					hdlTasteMaterials.Id = v.Id
 					// 存在则更新
 					result := tx.Model(&models.HdlMaterials{}).Where("id = ?", hdlTasteMaterials.Id).Updates(&hdlTasteMaterials)
 					if result.Error != nil {
