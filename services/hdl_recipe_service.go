@@ -42,7 +42,7 @@ func (*HdlRecipeService) GetHdlRecipeList(PaginationValidate valid.HdlRecipePagi
 	}
 	var count int64
 	db.Count(&count)
-	result := db.Limit(PaginationValidate.PerPage).Offset(offset).Order("create_at asc").Find(&HdlRecipes)
+	result := db.Limit(PaginationValidate.PerPage).Offset(offset).Order("create_at desc").Find(&HdlRecipes)
 	if result.Error != nil {
 		logs.Error(result.Error, gorm.ErrRecordNotFound)
 		return false, HdlRecipes, 0
