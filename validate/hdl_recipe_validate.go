@@ -33,6 +33,8 @@ type HdlRecipePaginationValidate struct {
 	PerPage     int    `json:"per_page"  alias:"每页页数" valid:"Required;Max(10000)"`
 	BottomPot   string `json:"bottom_pot,omitempty" alias:"口味名称" valid:"MaxSize(500)"`
 	Id          string `json:"id,omitempty" alias:"Id" valid:"MaxSize(36)"`
+	OrderBy     string `json:"order_by,omitempty" alias:"排序" valid:"MaxSize(50)"`
+	SortBy      string `json:"sort_by,omitempty" alias:"排序" valid:"MaxSize(50)"`
 }
 type RspHdlRecipePaginationValidate struct {
 	CurrentPage int                `json:"current_page"  alias:"当前页" valid:"Required;Min(1)"`

@@ -68,7 +68,13 @@ func (*HdlRecipeService) GetHdlRecipeEntireList(PaginationValidate valid.HdlReci
 	db = db.Joins("left join hdl_pot_type on hdl_pot_type.id = hdl_recipe.hdl_pot_type_id")
 	// 设置查询字段
 	db = db.Select("hdl_recipe.*,hdl_pot_type.name as pot_type_name,hdl_pot_type.pot_type_id as pot_type_id")
-	result := db.Limit(PaginationValidate.PerPage).Offset(offset).Order("update_at desc").Find(&hdlRecipesMap)
+	// 排序
+	if PaginationValidate.OrderBy != "" {
+		db = db.Order("hdl_recipe." + PaginationValidate.OrderBy + " " + PaginationValidate.SortBy)
+	} else {
+		db = db.Order("hdl_recipe.update_at desc")
+	}
+	result := db.Limit(PaginationValidate.PerPage).Offset(offset).Find(&hdlRecipesMap)
 	if result.Error != nil {
 		logs.Error(result.Error.Error())
 		return false, hdlRecipesMap, 0
