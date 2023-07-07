@@ -3,33 +3,33 @@ package valid
 import "ThingsPanel-Go/models"
 
 type AddHdlMaterialsValidate struct {
-	Name      string `json:"name,omitempty" alias:"物料名称" valid:"Required;MaxSize(500)"`    // 物料名称
-	Dosage    int64  `json:"dosage,omitempty" alias:"用量" valid:"Required"`                 // 用量
-	Unit      string `json:"unit,omitempty" alias:"单位" valid:"Required;MaxSize(50)"`       // 单位
-	WaterLine int64  `json:"water_line,omitempty" alias:"加汤水位标准" valid:"Required"`         // 加汤水位标准
-	Station   string `json:"station,omitempty" alias:"工位" valid:"Required;MaxSize(50)"`    //工位 （鲜料工位、传锅工位、所有工位、不显示）
-	Resource  string `json:"resource,omitempty" alias:"物料来源" valid:"Required;MaxSize(50)"` //物料来源 material-锅底 taste-口味
-	Remark    string `json:"remark,omitempty" alias:"备注" valid:"MaxSize(500)"`
+	Name      string  `json:"name,omitempty" alias:"物料名称" valid:"Required;MaxSize(500)"`    // 物料名称
+	Dosage    float64 `json:"dosage,omitempty" alias:"用量" valid:"Required"`                 // 用量
+	Unit      string  `json:"unit,omitempty" alias:"单位" valid:"Required;MaxSize(50)"`       // 单位
+	WaterLine int64   `json:"water_line,omitempty" alias:"加汤水位标准" valid:"Required"`         // 加汤水位标准
+	Station   string  `json:"station,omitempty" alias:"工位" valid:"Required;MaxSize(50)"`    //工位 （鲜料工位、传锅工位、所有工位、不显示）
+	Resource  string  `json:"resource,omitempty" alias:"物料来源" valid:"Required;MaxSize(50)"` //物料来源 material-锅底 taste-口味
+	Remark    string  `json:"remark,omitempty" alias:"备注" valid:"MaxSize(500)"`
 }
 type EditHdlMaterialsValidate struct {
-	Id        string `json:"id" alias:"ID" valid:"Required;MaxSize(36)"`          // ID
-	Name      string `json:"name,omitempty" alias:"物料名称" valid:"MaxSize(500)"`    // 物料名称
-	Dosage    int64  `json:"dosage,omitempty" alias:"用量"`                         // 用量
-	Unit      string `json:"unit,omitempty" alias:"单位" valid:"MaxSize(50)"`       // 单位
-	WaterLine int64  `json:"water_line,omitempty" alias:"加汤水位标准"`                 // 加汤水位标准
-	Station   string `json:"station,omitempty" alias:"工位" valid:"MaxSize(50)"`    //工位 （鲜料工位、传锅工位、所有工位、不显示）
-	Resource  string `json:"resource,omitempty" alias:"物料来源" valid:"MaxSize(50)"` //物料来源 material-锅底 taste-口味
-	Remark    string `json:"remark,omitempty" alias:"备注" valid:"MaxSize(500)"`
+	Id        string  `json:"id" alias:"ID" valid:"Required;MaxSize(36)"`          // ID
+	Name      string  `json:"name,omitempty" alias:"物料名称" valid:"MaxSize(500)"`    // 物料名称
+	Dosage    float64 `json:"dosage,omitempty" alias:"用量"`                         // 用量
+	Unit      string  `json:"unit,omitempty" alias:"单位" valid:"MaxSize(50)"`       // 单位
+	WaterLine int64   `json:"water_line,omitempty" alias:"加汤水位标准"`                 // 加汤水位标准
+	Station   string  `json:"station,omitempty" alias:"工位" valid:"MaxSize(50)"`    //工位 （鲜料工位、传锅工位、所有工位、不显示）
+	Resource  string  `json:"resource,omitempty" alias:"物料来源" valid:"MaxSize(50)"` //物料来源 material-锅底 taste-口味
+	Remark    string  `json:"remark,omitempty" alias:"备注" valid:"MaxSize(500)"`
 }
 type RecipeMaterialsValidate struct {
-	Id        string `json:"id" alias:"ID" valid:"MaxSize(36)"`                   // ID
-	Name      string `json:"name,omitempty" alias:"物料名称" valid:"MaxSize(500)"`    // 物料名称
-	Dosage    int64  `json:"dosage,omitempty" alias:"用量"`                         // 用量
-	Unit      string `json:"unit,omitempty" alias:"单位" valid:"MaxSize(50)"`       // 单位
-	WaterLine int64  `json:"water_line,omitempty" alias:"加汤水位标准"`                 // 加汤水位标准
-	Station   string `json:"station,omitempty" alias:"工位" valid:"MaxSize(50)"`    //工位 （鲜料工位、传锅工位、所有工位、不显示）
-	Resource  string `json:"resource,omitempty" alias:"物料来源" valid:"MaxSize(50)"` //物料来源 material-锅底 taste-口味
-	Remark    string `json:"remark,omitempty" alias:"备注" valid:"MaxSize(500)"`
+	Id        string  `json:"id" alias:"ID" valid:"MaxSize(36)"`                   // ID
+	Name      string  `json:"name,omitempty" alias:"物料名称" valid:"MaxSize(500)"`    // 物料名称
+	Dosage    float64 `json:"dosage,omitempty" alias:"用量"`                         // 用量
+	Unit      string  `json:"unit,omitempty" alias:"单位" valid:"MaxSize(50)"`       // 单位
+	WaterLine int64   `json:"water_line,omitempty" alias:"加汤水位标准"`                 // 加汤水位标准
+	Station   string  `json:"station,omitempty" alias:"工位" valid:"MaxSize(50)"`    //工位 （鲜料工位、传锅工位、所有工位、不显示）
+	Resource  string  `json:"resource,omitempty" alias:"物料来源" valid:"MaxSize(50)"` //物料来源 material-锅底 taste-口味
+	Remark    string  `json:"remark,omitempty" alias:"备注" valid:"MaxSize(500)"`
 }
 
 type HdlMaterialsPaginationValidate struct {

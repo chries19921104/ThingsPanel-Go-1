@@ -537,13 +537,13 @@ type SendRecipe struct {
 	BottomProperties string   `json:"BottomProperties"`
 }
 type SendMaterials struct {
-	Id        string `json:"Id"`
-	Name      string `json:"Name"`
-	Dosage    int    `json:"Dosage"`
-	Unit      string `json:"Unit"`
-	WaterLine int    `json:"WaterLine"`
-	Station   string `json:"Station"`
-	Resource  string `json:"Resource"`
+	Id        string  `json:"Id"`
+	Name      string  `json:"Name"`
+	Dosage    float64 `json:"Dosage"`
+	Unit      string  `json:"Unit"`
+	WaterLine int     `json:"WaterLine"`
+	Station   string  `json:"Station"`
+	Resource  string  `json:"Resource"`
 }
 type SendTaste struct {
 	Name           string   `json:"Name"`
@@ -644,7 +644,7 @@ func (*HdlRecipeService) SendHdlRecipe(SendHdlRecipeValidate valid.SendHdlRecipe
 		var sendMaterials = &SendMaterials{
 			Id:        v.Id,
 			Name:      v.Name,
-			Dosage:    int(v.Dosage),
+			Dosage:    v.Dosage,
 			Unit:      v.Unit,
 			WaterLine: int(v.WaterLine),
 			Station:   v.Station,
@@ -664,7 +664,7 @@ func (*HdlRecipeService) SendHdlRecipe(SendHdlRecipeValidate valid.SendHdlRecipe
 		var sendMaterials = &SendMaterials{
 			Id:        v.Id,
 			Name:      v.Name,
-			Dosage:    int(v.Dosage),
+			Dosage:    v.Dosage,
 			Unit:      v.Unit,
 			WaterLine: int(v.WaterLine),
 			Station:   v.Station,
