@@ -704,20 +704,24 @@ func (*HdlRecipeService) SendHdlRecipe(SendHdlRecipeValidate valid.SendHdlRecipe
 }
 
 type PotTypeConfig struct {
-	SendId  string
-	PotType []*SendPotType
+	SendFlag string
+	SendId   string
+	PotType  []*SendPotType
 }
 type TasteConfig struct {
-	SendId string
-	Taste  []*SendTaste
+	SendId   string
+	Taste    []*SendTaste
+	SendFlag string
 }
 type MaterialsConfig struct {
 	SendId    string
 	Materials []*SendMaterials
+	SendFlag  string
 }
 type RecipeConfig struct {
-	SendId string
-	Recipe []*SendRecipe
+	SendId   string
+	Recipe   []*SendRecipe
+	SendFlag string
 }
 
 // 随机字符串
@@ -754,14 +758,17 @@ func (*HdlRecipeService) SplitSendMqtt(data *SendConfig, token string, intervalT
 	//等待时间
 	time.Sleep(time.Second * time.Duration(intervalTime))
 	//口味配置,每10个口味下发一次
-	for i := 0; i < len(data.Taste); i += 10 {
-		end := i + 10
+	for i := 0; i < len(data.Taste); i += 5 {
+		end := i + 5
 		if end > len(data.Taste) {
 			end = len(data.Taste)
 		}
 		tasteConfig := &TasteConfig{
 			SendId: sendId,
 			Taste:  data.Taste[i:end],
+		}
+		if i == 0 {
+			tasteConfig.SendFlag = "1"
 		}
 		bytes, err := json.Marshal(tasteConfig)
 		if err != nil {
@@ -774,8 +781,8 @@ func (*HdlRecipeService) SplitSendMqtt(data *SendConfig, token string, intervalT
 		time.Sleep(time.Second * time.Duration(intervalTime))
 	}
 	//食材配置,每10个食材下发一次
-	for i := 0; i < len(data.Materials); i += 10 {
-		end := i + 10
+	for i := 0; i < len(data.Materials); i += 5 {
+		end := i + 5
 		if end > len(data.Materials) {
 			end = len(data.Materials)
 		}
@@ -794,14 +801,18 @@ func (*HdlRecipeService) SplitSendMqtt(data *SendConfig, token string, intervalT
 		time.Sleep(time.Second * time.Duration(intervalTime))
 	}
 	//食谱配置,每10个食谱下发一次
-	for i := 0; i < len(data.Recipe); i += 10 {
-		end := i + 10
+	for i := 0; i < len(data.Recipe); i += 5 {
+		end := i + 5
 		if end > len(data.Recipe) {
 			end = len(data.Recipe)
 		}
 		recipeConfig := &RecipeConfig{
 			SendId: sendId,
 			Recipe: data.Recipe[i:end],
+		}
+		//最后一次下发
+		if end == len(data.Recipe) {
+			recipeConfig.SendFlag = "0"
 		}
 		bytes, err := json.Marshal(recipeConfig)
 		if err != nil {
