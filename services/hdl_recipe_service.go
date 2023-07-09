@@ -706,22 +706,26 @@ func (*HdlRecipeService) SendHdlRecipe(SendHdlRecipeValidate valid.SendHdlRecipe
 type PotTypeConfig struct {
 	SendFlag string
 	SendId   string
+	SendNum  int
 	PotType  []*SendPotType
 }
 type TasteConfig struct {
 	SendId   string
 	Taste    []*SendTaste
+	SendNum  int
 	SendFlag string
 }
 type MaterialsConfig struct {
 	SendId    string
 	Materials []*SendMaterials
 	SendFlag  string
+	SendNum   int
 }
 type RecipeConfig struct {
 	SendId   string
 	Recipe   []*SendRecipe
 	SendFlag string
+	SendNum  int
 }
 
 // 随机字符串
@@ -742,10 +746,14 @@ func GetRandomString(l int) string {
 func (*HdlRecipeService) SplitSendMqtt(data *SendConfig, token string, intervalTime int) error {
 	//随机6位字符串
 	sendId := GetRandomString(6)
+	// 计数
+	var sendNum int = 0
 	// 锅型配置
 	potTypeConfig := &PotTypeConfig{
-		SendId:  sendId,
-		PotType: data.PotType,
+		SendId:   sendId,
+		PotType:  data.PotType,
+		SendFlag: "1",
+		SendNum:  sendNum,
 	}
 	//发送给mqtt
 	bytes, err := json.Marshal(potTypeConfig)
@@ -755,20 +763,20 @@ func (*HdlRecipeService) SplitSendMqtt(data *SendConfig, token string, intervalT
 	if err := sendmqtt.SendToHDL(bytes, token); err != nil {
 		return err
 	}
+	sendNum++
 	//等待时间
 	time.Sleep(time.Second * time.Duration(intervalTime))
 	//口味配置,每10个口味下发一次
 	for i := 0; i < len(data.Taste); i += 5 {
+
 		end := i + 5
 		if end > len(data.Taste) {
 			end = len(data.Taste)
 		}
 		tasteConfig := &TasteConfig{
-			SendId: sendId,
-			Taste:  data.Taste[i:end],
-		}
-		if i == 0 {
-			tasteConfig.SendFlag = "1"
+			SendId:  sendId,
+			Taste:   data.Taste[i:end],
+			SendNum: sendNum,
 		}
 		bytes, err := json.Marshal(tasteConfig)
 		if err != nil {
@@ -777,6 +785,7 @@ func (*HdlRecipeService) SplitSendMqtt(data *SendConfig, token string, intervalT
 		if err := sendmqtt.SendToHDL(bytes, token); err != nil {
 			return err
 		}
+		sendNum++
 		//等待时间
 		time.Sleep(time.Second * time.Duration(intervalTime))
 	}
@@ -789,6 +798,7 @@ func (*HdlRecipeService) SplitSendMqtt(data *SendConfig, token string, intervalT
 		materialsConfig := &MaterialsConfig{
 			SendId:    sendId,
 			Materials: data.Materials[i:end],
+			SendNum:   sendNum,
 		}
 		bytes, err := json.Marshal(materialsConfig)
 		if err != nil {
@@ -797,6 +807,7 @@ func (*HdlRecipeService) SplitSendMqtt(data *SendConfig, token string, intervalT
 		if err := sendmqtt.SendToHDL(bytes, token); err != nil {
 			return err
 		}
+		sendNum++
 		//等待时间
 		time.Sleep(time.Second * time.Duration(intervalTime))
 	}
@@ -807,8 +818,9 @@ func (*HdlRecipeService) SplitSendMqtt(data *SendConfig, token string, intervalT
 			end = len(data.Recipe)
 		}
 		recipeConfig := &RecipeConfig{
-			SendId: sendId,
-			Recipe: data.Recipe[i:end],
+			SendId:  sendId,
+			Recipe:  data.Recipe[i:end],
+			SendNum: sendNum,
 		}
 		//最后一次下发
 		if end == len(data.Recipe) {
@@ -821,6 +833,7 @@ func (*HdlRecipeService) SplitSendMqtt(data *SendConfig, token string, intervalT
 		if err := sendmqtt.SendToHDL(bytes, token); err != nil {
 			return err
 		}
+		sendNum++
 		//等待时间
 		time.Sleep(time.Second * time.Duration(intervalTime))
 	}
