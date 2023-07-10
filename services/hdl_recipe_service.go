@@ -631,7 +631,7 @@ func (*HdlRecipeService) SendHdlRecipe(SendHdlRecipeValidate valid.SendHdlRecipe
 		var SendPotType = &SendPotType{
 			Name:         v.Name,
 			SoupStandard: int(v.SoupStandard),
-			PotTypeId:    v.Id,
+			PotTypeId:    v.PotTypeId,
 		}
 		// 加到SendPotTypeList中
 		SendPotTypeList = append(SendPotTypeList, SendPotType)
@@ -695,7 +695,7 @@ func (*HdlRecipeService) SendHdlRecipe(SendHdlRecipeValidate valid.SendHdlRecipe
 	}
 	// 拆分下发配置
 	var HdlRecipeService HdlRecipeService
-	err := HdlRecipeService.SplitSendMqtt(sendConfig, hdlDevice.Token, 5)
+	err := HdlRecipeService.SplitSendMqtt(sendConfig, hdlDevice.Token, 8)
 	if err != nil {
 		logs.Error(err.Error())
 		return err
