@@ -695,7 +695,7 @@ func (*HdlRecipeService) SendHdlRecipe(SendHdlRecipeValidate valid.SendHdlRecipe
 	}
 	// 拆分下发配置
 	var HdlRecipeService HdlRecipeService
-	err := HdlRecipeService.SplitSendMqtt(sendConfig, hdlDevice.Token, 8)
+	err := HdlRecipeService.SplitSendMqtt(sendConfig, hdlDevice.Token, 4)
 	if err != nil {
 		logs.Error(err.Error())
 		return err
@@ -835,7 +835,7 @@ func (*HdlRecipeService) SplitSendMqtt(data *SendConfig, token string, intervalT
 		}
 		sendNum++
 		//等待时间
-		time.Sleep(time.Second * time.Duration(intervalTime))
+		time.Sleep(time.Second * time.Duration(intervalTime+5))
 	}
 	return nil
 
