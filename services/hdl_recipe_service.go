@@ -582,10 +582,18 @@ func (*HdlRecipeService) SendHdlRecipe(SendHdlRecipeValidate valid.SendHdlRecipe
 			PotTypeId:        v.HdlPotTypeId,
 			BottomProperties: v.BottomProperties,
 		}
+		// 根据HdlPotTypeId获取pot_type_id
+		var hdlPotType models.HdlPotType
+		result := psql.Mydb.Model(&models.HdlPotType{}).Where("id = ?", v.HdlPotTypeId).Find(&hdlPotType)
+		if result.Error != nil {
+			logs.Error(result.Error.Error())
+			return result.Error
+		}
+		sendRecipe.PotTypeId = hdlPotType.PotTypeId
 		// 加到sendRecipeList中
 		sendRecipeList = append(sendRecipeList, sendRecipe)
 		var hdlRRecipeMaterials []models.HdlRRecipeMaterials
-		result := psql.Mydb.Model(&models.HdlRRecipeMaterials{}).Where("hdl_recipe_id = ?", v.Id).Find(&hdlRRecipeMaterials)
+		result = psql.Mydb.Model(&models.HdlRRecipeMaterials{}).Where("hdl_recipe_id = ?", v.Id).Find(&hdlRRecipeMaterials)
 		if result.Error != nil {
 			logs.Error(result.Error.Error())
 			return result.Error
@@ -611,6 +619,14 @@ func (*HdlRecipeService) SendHdlRecipe(SendHdlRecipeValidate valid.SendHdlRecipe
 				PotTypeId:   v.HdlPotTypeId,
 				BottomPotId: v.BottomPotId,
 			}
+			// 根据HdlPotTypeId获取pot_type_id
+			var hdlPotType models.HdlPotType
+			result := psql.Mydb.Model(&models.HdlPotType{}).Where("id = ?", v.HdlPotTypeId).Find(&hdlPotType)
+			if result.Error != nil {
+				logs.Error(result.Error.Error())
+				return result.Error
+			}
+			sendTaste.PotTypeId = hdlPotType.PotTypeId
 			// 加到sendTasteList中
 			sendTasteList = append(sendTasteList, sendTaste)
 		}
