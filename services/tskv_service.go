@@ -1214,8 +1214,10 @@ func (*TSKVService) HdlOrderMsgProc(body []byte, topic string) bool {
 	}
 	// 获取锅底id列表，potId用|分割，最后一个是锅型id，前面都是锅底id
 	var potTypeId string
+	var bottomId string
 	if strings.Count(data.PotID, "|") > 0 {
 		potTypeId = strings.Split(data.PotID, "|")[len(strings.Split(data.PotID, "|"))-1]
+		bottomId = strings.Replace(data.PotID, "|"+potTypeId, "", -1)
 	} else {
 		potTypeId = data.PotID
 	}
@@ -1245,7 +1247,7 @@ func (*TSKVService) HdlOrderMsgProc(body []byte, topic string) bool {
 		ShopId:            data.StoreID,
 		ShopName:          hdlTenant.Name,
 		OrderSn:           data.OrderID,
-		BottomId:          strings.Split(data.PotID, "|")[len(strings.Split(data.PotID, "|"))-1],
+		BottomId:          bottomId,
 		PotTypeId:         potTypeId,
 		BottomPot:         bottomName, //锅底名称（|分割）
 		TableNumber:       data.TableNumber,
