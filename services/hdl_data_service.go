@@ -24,8 +24,10 @@ type SoupDataService struct {
 func (*SoupDataService) GetList(PaginationValidate valid.SoupDataPaginationValidate, tenantId string) ([]map[string]interface{}, int64, error) {
 	// 根据租户id获取租户管理员的备注，租户管理员在user表存贮
 	var tenantAdmin models.Users
-	if err := psql.Mydb.Model(&models.Users{}).Where("tenant_id = ? and authority = 'TENANT_ADMIN'", tenantId).First(&tenantAdmin).Error; err != nil {
-		return nil, 0, err
+	if tenantId != "SYSTEM_ADMIN" {
+		if err := psql.Mydb.Model(&models.Users{}).Where("tenant_id = ? and authority = 'TENANT_ADMIN'", tenantId).First(&tenantAdmin).Error; err != nil {
+			return nil, 0, err
+		}
 	}
 	// 店铺名称是租户管理员的名称，店铺id是租户管理员的备注
 	var SoupData []models.HdlAddSoupData
@@ -36,10 +38,24 @@ func (*SoupDataService) GetList(PaginationValidate valid.SoupDataPaginationValid
 		db.Where("shop_name like ?", "%"+PaginationValidate.ShopName+"%")
 	}
 	// 根据店铺id查询店铺订单数量
-	if tenantAdmin.Remark != "" {
-		db = db.Where("shop_id = ?", tenantAdmin.Remark)
-	} else {
-		return nil, 0, errors.New("店铺id为空，请先设置店铺id")
+	if tenantId != "SYSTEM_ADMIN" {
+		if tenantAdmin.Remark != "" {
+			db = db.Where("shop_id = ?", tenantAdmin.Remark)
+		} else {
+			return nil, 0, errors.New("店铺id为空，请先设置店铺id")
+		}
+	}
+	// 如果桌号不为空，则根据桌号查询
+	if PaginationValidate.TableNumber != "" {
+		db = db.Where("table_number = ?", PaginationValidate.TableNumber)
+	}
+	// 如果订单检索开始时间不为空，则根据订单检索开始时间查询
+	if PaginationValidate.StartTime != "" {
+		db = db.Where("creation_time >= ?", PaginationValidate.StartTime)
+	}
+	// 如果订单检索结束时间不为空，则根据订单检索结束时间查询
+	if PaginationValidate.EndTime != "" {
+		db = db.Where("creation_time <= ?", PaginationValidate.EndTime)
 	}
 	// 定义店铺数量
 	var count int64
@@ -57,16 +73,16 @@ func (*SoupDataService) GetList(PaginationValidate valid.SoupDataPaginationValid
 		// 定义一个map
 		SoupDataMap := make(map[string]interface{})
 
-		SoupDataMap["order_sn"] = v.OrderSn                       //订单号
-		SoupDataMap["table_number"] = v.TableNumber               //桌号
-		SoupDataMap["shop_id"] = v.ShopId                         //店铺id
-		SoupDataMap["bottom_id"] = v.BottomId                     //锅底id
-		SoupDataMap["bottom_pot"] = v.BottomPot                   //锅底名称
-		SoupDataMap["shop_name"] = v.ShopName                     //店铺名称
-		SoupDataMap["order_time"] = v.OrderTime                   //下单时间
-		SoupDataMap["feeding_end_time"] = v.FeedingEndTime        //投料结束时间
+		SoupDataMap["order_sn"] = v.OrderSn         //订单号
+		SoupDataMap["table_number"] = v.TableNumber //桌号
+		SoupDataMap["shop_id"] = v.ShopId           //店铺id
+		SoupDataMap["bottom_id"] = v.BottomId       //锅底id
+		SoupDataMap["bottom_pot"] = v.BottomPot     //锅底名称
+		SoupDataMap["shop_name"] = v.ShopName       //店铺名称
+		SoupDataMap["order_time"] = v.OrderTime     //下单时间
+		//SoupDataMap["feeding_end_time"] = v.FeedingEndTime        //投料结束时间
 		SoupDataMap["soup_start_time"] = v.SoupStartTime          //加汤开始时间
-		SoupDataMap["turning_pot_end_time"] = v.TurningPotEndTime //翻锅结束时间
+		SoupDataMap["turning_pot_end_time"] = v.TurningPotEndTime //转锅结束时间
 		SoupDataMap["soup_end_time"] = v.SoupEndTime              //加汤结束时间
 		//SoupDataMap["feeding_start_time"] = v.FeedingStartTime//投料开始时间
 		SoupDataMap["creation_time"] = v.CreationTime //订单创建时间

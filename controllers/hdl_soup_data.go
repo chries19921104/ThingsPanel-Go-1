@@ -40,12 +40,24 @@ func (soup *SoupDataController) Index() {
 		}
 		return
 	}
-	// 获取用户租户id
-	tenantId, ok := soup.Ctx.Input.GetData("tenant_id").(string)
+	var tenantId string
+	// 判断是否是系统管理员
+	authority, ok := soup.Ctx.Input.GetData("authority").(string)
 	if !ok {
-		response.SuccessWithMessage(400, "代码逻辑错误,未获取到租户id", (*context2.Context)(soup.Ctx))
+		response.SuccessWithMessage(400, "代码逻辑错误,未获取到用户权限", (*context2.Context)(soup.Ctx))
 		return
 	}
+	if authority == "SYSTEM_ADMIN" {
+		tenantId = "SYSTEM_ADMIN"
+	} else {
+		// 获取用户租户id
+		tenantId, ok = soup.Ctx.Input.GetData("tenant_id").(string)
+		if !ok {
+			response.SuccessWithMessage(400, "代码逻辑错误,未获取到租户id", (*context2.Context)(soup.Ctx))
+			return
+		}
+	}
+
 	var SoupDataService services.SoupDataService
 	d, t, err := SoupDataService.GetList(PaginationValidate, tenantId)
 	if err != nil {
@@ -80,11 +92,22 @@ func (soup *SoupDataController) Export() {
 		}
 		return
 	}
-	// 获取用户租户id
-	tenantId, ok := soup.Ctx.Input.GetData("tenant_id").(string)
+	var tenantId string
+	// 判断是否是系统管理员
+	authority, ok := soup.Ctx.Input.GetData("authority").(string)
 	if !ok {
-		response.SuccessWithMessage(400, "代码逻辑错误,未获取到租户id", (*context2.Context)(soup.Ctx))
+		response.SuccessWithMessage(400, "代码逻辑错误,未获取到用户权限", (*context2.Context)(soup.Ctx))
 		return
+	}
+	if authority == "SYSTEM_ADMIN" {
+		tenantId = "SYSTEM_ADMIN"
+	} else {
+		// 获取用户租户id
+		tenantId, ok = soup.Ctx.Input.GetData("tenant_id").(string)
+		if !ok {
+			response.SuccessWithMessage(400, "代码逻辑错误,未获取到租户id", (*context2.Context)(soup.Ctx))
+			return
+		}
 	}
 	var TSKVService services.SoupDataService
 	//每次查10000条
@@ -99,8 +122,8 @@ func (soup *SoupDataController) Export() {
 	excel_file.SetCellValue("Sheet1", "E1", "订单时间")
 	excel_file.SetCellValue("Sheet1", "F1", "开始加汤时间")
 	excel_file.SetCellValue("Sheet1", "G1", "加汤完毕时间")
-	excel_file.SetCellValue("Sheet1", "H1", "加料完成时间")
-	excel_file.SetCellValue("Sheet1", "I1", "转锅完成时间")
+	//excel_file.SetCellValue("Sheet1", "H1", "加料完成时间")
+	excel_file.SetCellValue("Sheet1", "H1", "传锅完成时间")
 	for i := 0; i <= num; i++ {
 		var t []map[string]interface{}
 		var c int64
@@ -126,8 +149,8 @@ func (soup *SoupDataController) Export() {
 				excel_file.SetCellValue("Sheet1", "E"+is, tv["creation_time"])
 				excel_file.SetCellValue("Sheet1", "F"+is, tv["soup_start_time"])
 				excel_file.SetCellValue("Sheet1", "G"+is, tv["soup_end_time"])
-				excel_file.SetCellValue("Sheet1", "H"+is, tv["feeding_end_time"])
-				excel_file.SetCellValue("Sheet1", "I"+is, tv["turning_pot_end_time"])
+				//excel_file.SetCellValue("Sheet1", "H"+is, tv["feeding_end_time"])
+				excel_file.SetCellValue("Sheet1", "H"+is, tv["turning_pot_end_time"])
 			}
 		}
 	}
