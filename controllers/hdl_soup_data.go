@@ -47,8 +47,8 @@ func (soup *SoupDataController) Index() {
 		response.SuccessWithMessage(400, "代码逻辑错误,未获取到用户权限", (*context2.Context)(soup.Ctx))
 		return
 	}
-	if authority == "SYSTEM_ADMIN" {
-		tenantId = "SYSTEM_ADMIN"
+	if authority == "SYS_ADMIN" {
+		tenantId = "SYS_ADMIN"
 	} else {
 		// 获取用户租户id
 		tenantId, ok = soup.Ctx.Input.GetData("tenant_id").(string)
@@ -99,8 +99,8 @@ func (soup *SoupDataController) Export() {
 		response.SuccessWithMessage(400, "代码逻辑错误,未获取到用户权限", (*context2.Context)(soup.Ctx))
 		return
 	}
-	if authority == "SYSTEM_ADMIN" {
-		tenantId = "SYSTEM_ADMIN"
+	if authority == "SYS_ADMIN" {
+		tenantId = "SYS_ADMIN"
 	} else {
 		// 获取用户租户id
 		tenantId, ok = soup.Ctx.Input.GetData("tenant_id").(string)

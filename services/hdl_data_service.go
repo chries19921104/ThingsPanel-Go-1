@@ -24,7 +24,7 @@ type SoupDataService struct {
 func (*SoupDataService) GetList(PaginationValidate valid.SoupDataPaginationValidate, tenantId string) ([]map[string]interface{}, int64, error) {
 	// 根据租户id获取租户管理员的备注，租户管理员在user表存贮
 	var tenantAdmin models.Users
-	if tenantId != "SYSTEM_ADMIN" {
+	if tenantId != "SYS_ADMIN" {
 		if err := psql.Mydb.Model(&models.Users{}).Where("tenant_id = ? and authority = 'TENANT_ADMIN'", tenantId).First(&tenantAdmin).Error; err != nil {
 			return nil, 0, err
 		}
@@ -38,7 +38,7 @@ func (*SoupDataService) GetList(PaginationValidate valid.SoupDataPaginationValid
 		db.Where("shop_name like ?", "%"+PaginationValidate.ShopName+"%")
 	}
 	// 根据店铺id查询店铺订单数量
-	if tenantId != "SYSTEM_ADMIN" {
+	if tenantId != "SYS_ADMIN" {
 		if tenantAdmin.Remark != "" {
 			db = db.Where("shop_id = ?", tenantAdmin.Remark)
 		} else {
