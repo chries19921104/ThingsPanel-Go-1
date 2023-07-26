@@ -627,6 +627,19 @@ func (*HdlRecipeService) SendHdlRecipe(SendHdlRecipeValidate valid.SendHdlRecipe
 				return result.Error
 			}
 			sendTaste.PotTypeId = hdlPotType.PotTypeId
+			// 根据口味id获取口味物料关系
+			var hdlRTasteMaterials []models.HdlRTasteMaterials
+			result = psql.Mydb.Model(&models.HdlRTasteMaterials{}).Where("hdl_taste_id = ?", vv.Id).Find(&hdlRTasteMaterials)
+			if result.Error != nil {
+				logs.Error(result.Error.Error())
+				return result.Error
+			}
+			var materialsIdList []string
+			// 遍历hdlRTasteMaterials,获取物料id
+			for _, v := range hdlRTasteMaterials {
+				materialsIdList = append(materialsIdList, v.HdlMaterialsId)
+			}
+			sendTaste.MaterialIdList = materialsIdList
 			// 加到sendTasteList中
 			sendTasteList = append(sendTasteList, sendTaste)
 		}
