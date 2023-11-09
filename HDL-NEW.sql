@@ -160,3 +160,5 @@ ALTER TABLE public.hdl_add_soup_data ADD creation_time varchar(50) NULL;
 COMMENT ON COLUMN public.hdl_add_soup_data.creation_time IS '订单创建时间';
 ALTER TABLE public.hdl_recipe ADD CONSTRAINT hdl_recipe_fk FOREIGN KEY (hdl_pot_type_id) REFERENCES public.hdl_pot_type(id) ON DELETE RESTRICT;
 ALTER TABLE public.hdl_materials ALTER COLUMN dosage TYPE float8 USING dosage::float8;
+--2023.11.9
+ALTER TABLE public.hdl_pot_type ADD tenant_id varchar(36) NULL;

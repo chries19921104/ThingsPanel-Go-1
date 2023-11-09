@@ -27,10 +27,11 @@ func (*HdlPotTypeService) GetHdlPotTypeDetail(pot_id string) []models.HdlPotType
 }
 
 // 获取列表
-func (*HdlPotTypeService) GetHdlPotTypeList(PaginationValidate valid.HdlPotTypePaginationValidate) (bool, []models.HdlPotType, int64) {
+func (*HdlPotTypeService) GetHdlPotTypeList(PaginationValidate valid.HdlPotTypePaginationValidate, tenantId string) (bool, []models.HdlPotType, int64) {
 	var HdlPotTypes []models.HdlPotType
 	offset := (PaginationValidate.CurrentPage - 1) * PaginationValidate.PerPage
 	db := psql.Mydb.Model(&models.HdlPotType{})
+	db.Where("tenant_id = ? or tenant_id = '000000'", tenantId)
 	if PaginationValidate.Name != "" {
 		db.Where("name like ?", "%"+PaginationValidate.Name+"%")
 	}
@@ -48,7 +49,7 @@ func (*HdlPotTypeService) GetHdlPotTypeList(PaginationValidate valid.HdlPotTypeP
 }
 
 // 新增数据
-func (*HdlPotTypeService) AddHdlPotType(pot valid.AddHdlPotTypeValidate) (models.HdlPotType, error) {
+func (*HdlPotTypeService) AddHdlPotType(pot valid.AddHdlPotTypeValidate, tenantId string) (models.HdlPotType, error) {
 	var HdlPotType models.HdlPotType = models.HdlPotType{
 		Id:           uuid.GetUuid(),
 		Name:         pot.Name,
@@ -58,6 +59,7 @@ func (*HdlPotTypeService) AddHdlPotType(pot valid.AddHdlPotTypeValidate) (models
 		UpdateAt:     time.Now().Unix(),
 		Remark:       pot.Remark,
 		PotTypeId:    pot.PotTypeId,
+		TenantId:     tenantId,
 	}
 	result := psql.Mydb.Create(&HdlPotType)
 	if result.Error != nil {

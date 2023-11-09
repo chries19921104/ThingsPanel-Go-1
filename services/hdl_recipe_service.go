@@ -724,7 +724,7 @@ func (*HdlRecipeService) SendHdlRecipe(SendHdlRecipeValidate valid.SendHdlRecipe
 	}
 	// 拆分下发配置
 	var HdlRecipeService HdlRecipeService
-	err := HdlRecipeService.SplitSendMqtt(sendConfig, hdlDevice.Token, 7)
+	err := HdlRecipeService.SplitSendMqtt(sendConfig, hdlDevice.Token, 3)
 	if err != nil {
 		logs.Error(err.Error())
 		return err

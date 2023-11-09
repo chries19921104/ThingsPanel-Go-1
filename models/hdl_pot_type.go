@@ -9,6 +9,7 @@ type HdlPotType struct {
 	SoupStandard int64  `json:"soup_standard,omitempty"`          // 加汤水位线标准
 	PotTypeId    string `json:"pot_type_id,omitempty"`            // 锅型id
 	Remark       string `json:"remark,omitempty" gorm:"size:255"`
+	TenantId     string `json:"tenant_id,omitempty" gorm:"size:255"`
 }
 
 func (HdlPotType) TableName() string {

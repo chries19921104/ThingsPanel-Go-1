@@ -26,8 +26,10 @@ func (c *HdlPotTypeController) List() {
 		utils.SuccessWithMessage(1000, err.Error(), (*context2.Context)(c.Ctx))
 		return
 	}
+	//获取租户id
+	tenant_id := c.Ctx.Input.Header("tenant_id")
 	var HdlPotTypeService services.HdlPotTypeService
-	isSuccess, d, t := HdlPotTypeService.GetHdlPotTypeList(reqData)
+	isSuccess, d, t := HdlPotTypeService.GetHdlPotTypeList(reqData, tenant_id)
 	if !isSuccess {
 		utils.SuccessWithMessage(1000, "查询失败", (*context2.Context)(c.Ctx))
 		return
@@ -65,8 +67,10 @@ func (c *HdlPotTypeController) Add() {
 		utils.SuccessWithMessage(1000, err.Error(), (*context2.Context)(c.Ctx))
 		return
 	}
+	// 获取租户id
+	tenant_id := c.Ctx.Input.Header("tenant_id")
 	var HdlPotTypeService services.HdlPotTypeService
-	d, rsp_err := HdlPotTypeService.AddHdlPotType(reqData)
+	d, rsp_err := HdlPotTypeService.AddHdlPotType(reqData, tenant_id)
 	if rsp_err == nil {
 		utils.SuccessWithDetailed(200, "success", d, map[string]string{}, (*context2.Context)(c.Ctx))
 	} else {
