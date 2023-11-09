@@ -27,9 +27,14 @@ func (c *HdlPotTypeController) List() {
 		return
 	}
 	//获取租户id
-	tenant_id := c.Ctx.Input.Header("tenant_id")
+	//获取租户id
+	tenantId, ok := c.Ctx.Input.GetData("tenant_id").(string)
+	if !ok {
+		utils.SuccessWithMessage(400, "代码逻辑错误", (*context2.Context)(c.Ctx))
+		return
+	}
 	var HdlPotTypeService services.HdlPotTypeService
-	isSuccess, d, t := HdlPotTypeService.GetHdlPotTypeList(reqData, tenant_id)
+	isSuccess, d, t := HdlPotTypeService.GetHdlPotTypeList(reqData, tenantId)
 	if !isSuccess {
 		utils.SuccessWithMessage(1000, "查询失败", (*context2.Context)(c.Ctx))
 		return
@@ -68,9 +73,13 @@ func (c *HdlPotTypeController) Add() {
 		return
 	}
 	// 获取租户id
-	tenant_id := c.Ctx.Input.Header("tenant_id")
+	tenantId, ok := c.Ctx.Input.GetData("tenant_id").(string)
+	if !ok {
+		utils.SuccessWithMessage(400, "代码逻辑错误", (*context2.Context)(c.Ctx))
+		return
+	}
 	var HdlPotTypeService services.HdlPotTypeService
-	d, rsp_err := HdlPotTypeService.AddHdlPotType(reqData, tenant_id)
+	d, rsp_err := HdlPotTypeService.AddHdlPotType(reqData, tenantId)
 	if rsp_err == nil {
 		utils.SuccessWithDetailed(200, "success", d, map[string]string{}, (*context2.Context)(c.Ctx))
 	} else {
